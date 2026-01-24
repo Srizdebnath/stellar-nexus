@@ -1,5 +1,6 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, Env, String, Symbol, Vec, vec};
+use soroban_sdk::{contract, contractimpl, Env, String, Vec, vec, BytesN};
+use soroban_sdk::xdr::ToXdr; // <--- FIX 1: Needed for .to_xdr()
 
 #[contract]
 pub struct NexusContract;
@@ -20,20 +21,14 @@ impl NexusContract {
         result_vec
     }
 
-    // --- APPLET 2: Hash Generator (NEW) ---
-    // Simulates generating a hash (in a real app, you'd use env.crypto().sha256)
-    pub fn generate_hash(env: Env, text: String) -> Vec<String> {
-        let mut result_vec = vec![&env];
+    // --- APPLET 2: Hash Generator (REAL CRYPTO) ---
+    pub fn generate_hash(env: Env, text: String) -> BytesN<32> {
         
-        // 1. Create a "mock" hash by reversing and tagging the text
-        // (Visual proof that logic ran on-chain)
-        let mut prefix = String::from_str(&env, "0xHASH_");
-        
-        // Note: Real string manipulation is limited in Soroban to keep costs low.
-        // We will return a structured response.
-        result_vec.push_back(text);
-        result_vec.push_back(prefix); 
-        
-        result_vec
+        // 1. Convert String to Bytes (Requires use soroban_sdk::xdr::ToXdr)
+        let data_bytes = text.to_xdr(&env);
+
+        // 2. Compute SHA256
+        // FIX 2: Added .into() to convert the internal Hash type to BytesN<32>
+        env.crypto().sha256(&data_bytes).into()
     }
 }
