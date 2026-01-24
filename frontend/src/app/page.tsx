@@ -253,7 +253,8 @@ export default function Home() {
     setAiLoading(true);
     setAiResult("");
     try {
-      const response = await fetch('http://localhost:4000/api/generate-code', {
+      const apiUrl = process.env.NEXT_PUBLIC_AI_API_URL || 'http://localhost:4000';
+      const response = await fetch(`${apiUrl}/api/generate-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: aiInput }),
