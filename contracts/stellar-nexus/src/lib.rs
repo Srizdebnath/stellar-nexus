@@ -31,4 +31,24 @@ impl NexusContract {
         // FIX 2: Added .into() to convert the internal Hash type to BytesN<32>
         env.crypto().sha256(&data_bytes).into()
     }
+
+    // --- APPLET 3: ASCII Art Generator ---
+    pub fn generate_art(env: Env, text: String) -> Vec<String> {
+        let mut art = vec![&env];
+        
+        // Create a retro "Frame" around the text
+        let top_border = String::from_str(&env, "+----------------------+");
+        let spacer = String::from_str(&env, "|                      |");
+        
+        art.push_back(top_border.clone());
+        art.push_back(spacer.clone());
+        
+        // Push the user's text (In the center)
+        art.push_back(text);
+        
+        art.push_back(spacer);
+        art.push_back(top_border);
+        
+        art
+    }
 }

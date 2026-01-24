@@ -2,7 +2,7 @@ export const APPLETS = [
   {
     id: 1,
     name: "Text Processor",
-    contractId: "YOUR_TEXT_CONTRACT_ID", // Paste your Text Processor ID
+    contractId: "CBBGXGBFGKRNPETQH6AKBWIHPC7HM5IJFOB7YOIT34QWYBWHVYJUAE5Z", 
     owner: "GD2M...XFYZ",
     description: "[Functions: get_stats, execute] Process and analyze text data on-chain.",
     price: "10",
@@ -16,7 +16,7 @@ export const APPLETS = [
   {
     id: 2,
     name: "Hash Generator",
-    contractId: "YOUR_HASH_CONTRACT_ID", 
+    contractId: "CDHQIJJJIP2QRH7EGLEJFPGJ7JD3XAWUN43Y3CXVCZX2JYDPG6C5YQ2J", 
     owner: "GD2M...XFYZ",
     description: "[Functions: generate_hash] Cryptographic hash generation for any input data.",
     price: "25",
@@ -29,16 +29,16 @@ export const APPLETS = [
   },
   {
     id: 3,
-    name: "Data Validator",
-    contractId: "Coming Soon",
+    name: "ASCII Art Gen",
+    contractId: "CC6MG2FDXFJYOAHRNSB6RVSUWDDYS6HV6FCUB4ESNISK575GS4WMBVAJ",
     owner: "GD2M...XFYZ",
-    description: "[Functions: validate] JSON structure validation with field checking.",
-    price: "15",
-    inputSchema: "JSON",
-    outputSchema: "Boolean",
-    totalExecutions: 0,
+    description: "[Functions: generate_art] Generates retro ASCII art frames for your text on-chain.",
+    price: "5",
+    inputSchema: "String",
+    outputSchema: "Vec<String>",
+    totalExecutions: 42,
     trustScore: "100%",
-    status: "Standard",
+    status: "Active",
     color: "green"
-  }
+  },
 ];
