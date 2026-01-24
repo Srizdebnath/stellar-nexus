@@ -256,6 +256,7 @@ export default function DocsPage() {
                 <div className="flex gap-6 text-sm text-gray-400">
                     <Link href="/marketplace" className="hover:text-white transition">Marketplace</Link>
                     <Link href="/pipeline" className="hover:text-white transition">Pipeline</Link>
+                    <Link href="/dashboard" className="hover:text-white transition hover:scale-105 duration-200">Dashboard</Link>
                     <span className="text-white font-medium">Docs</span>
                     <Link href="/go-live" className="text-cyan-400 font-medium hover:text-cyan-300 transition hover:scale-105 duration-200">Go Live</Link>
                 </div>

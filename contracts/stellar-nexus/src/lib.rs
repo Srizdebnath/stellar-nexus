@@ -100,6 +100,11 @@ impl NexusContract {
             .unwrap()
     }
 
+    /// Helper: Get Total Listing Count
+    pub fn get_listing_count(env: Env) -> u64 {
+        Self::get_next_id(&env) - 1
+    }
+
     // ============================================================
     // ⚡ PREVIOUS DEMO LOGIC (Text, Hash, Art)
     // ============================================================

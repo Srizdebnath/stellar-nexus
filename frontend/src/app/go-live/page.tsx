@@ -7,7 +7,7 @@ import { isAllowed, setAllowed, requestAccess, signTransaction } from '@stellar/
 import * as StellarSdk from '@stellar/stellar-sdk';
 
 // 🛑 CONFIGURATION
-const CONTRACT_ID = "CDRY2JAYJKHO6A2CJY7LCRZFQXM3PEJ56A2VVSRENS5AMU32ZYUHUB6L";
+const CONTRACT_ID = "CAAQBQS5XV4KB3TKY4CLLEXGQL2Y43D5HG2JPVKKBQ7CWYK2YXT7M5LE";
 const NETWORK_PASSPHRASE = StellarSdk.Networks.TESTNET;
 const SOROBAN_RPC_URL = "https://soroban-testnet.stellar.org";
 
@@ -211,6 +211,7 @@ export default function GoLivePage() {
                 <div className="flex gap-6 text-sm text-gray-400">
                     <Link href="/marketplace" className="hover:text-white transition">Marketplace</Link>
                     <Link href="/pipeline" className="hover:text-white transition">Pipeline</Link>
+                    <Link href="/dashboard" className="hover:text-white transition">Dashboard</Link>
                     <Link href="/docs" className="hover:text-white transition">Docs</Link>
                     <span className="text-cyan-400 font-medium">Go Live</span>
                 </div>

@@ -32,6 +32,7 @@ export default function LandingPage() {
         <div className="hidden md:flex gap-8 text-sm text-gray-400 font-medium">
           <Link href="/marketplace" className="hover:text-white transition hover:scale-105 duration-200">Marketplace</Link>
           <Link href="/pipeline" className="hover:text-white transition hover:scale-105 duration-200">Pipeline</Link>
+          <Link href="/dashboard" className="hover:text-white transition hover:scale-105 duration-200">Dashboard</Link>
           <Link href="/docs" className="hover:text-white transition hover:scale-105 duration-200">Docs</Link>
           <Link href="/go-live" className="text-cyan-400 font-medium hover:text-cyan-300 transition hover:scale-105 duration-200">Go Live</Link>
         </div>

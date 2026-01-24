@@ -11,7 +11,7 @@ import { Client } from "../../contracts/nexus_v4/src";
 import Link from 'next/link';
 
 
-const CONTRACT_ID = "CC6MG2FDXFJYOAHRNSB6RVSUWDDYS6HV6FCUB4ESNISK575GS4WMBVAJ";
+const CONTRACT_ID = "CAAQBQS5XV4KB3TKY4CLLEXGQL2Y43D5HG2JPVKKBQ7CWYK2YXT7M5LE";
 
 
 const CREATOR_WALLET = "GBKPWDVU4MJQ4JPMMYWOFTKAGQCSGOWC4MRHMS4VXUJSJJ6HYZBG2OPH";
@@ -290,6 +290,7 @@ export default function Home() {
         <div className="hidden md:flex gap-8 text-sm text-gray-400 font-medium">
           <Link href="/marketplace" className="text-white font-medium">Marketplace</Link>
           <Link href="/pipeline" className="hover:text-white transition hover:scale-105 duration-200">Pipeline</Link>
+          <Link href="/dashboard" className="hover:text-white transition hover:scale-105 duration-200">Dashboard</Link>
           <Link href="/docs" className="hover:text-white transition hover:scale-105 duration-200">Docs</Link>
           <Link href="/go-live" className="text-cyan-400 font-medium hover:text-cyan-300 transition hover:scale-105 duration-200">Go Live</Link>
         </div>
