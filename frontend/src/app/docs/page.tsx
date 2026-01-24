@@ -257,6 +257,7 @@ export default function DocsPage() {
                     <Link href="/marketplace" className="hover:text-white transition">Marketplace</Link>
                     <Link href="/pipeline" className="hover:text-white transition">Pipeline</Link>
                     <span className="text-white font-medium">Docs</span>
+                    <Link href="/go-live" className="text-cyan-400 font-medium hover:text-cyan-300 transition hover:scale-105 duration-200">Go Live</Link>
                 </div>
                 <button className="bg-white/10 border border-white/10 text-white px-5 py-2 rounded-full font-medium text-sm hover:bg-white/20 transition backdrop-blur-md">
                     Connect Wallet

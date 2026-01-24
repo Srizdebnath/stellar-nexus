@@ -87,6 +87,7 @@ export default function PipelinePage() {
                 <div className="hidden md:flex gap-6 text-sm text-gray-400 font-medium">
                     <Link href="/marketplace" className="hover:text-white transition hover:scale-105 duration-200">Marketplace</Link>
                     <Link href="/docs" className="hover:text-white transition hover:scale-105 duration-200">Docs</Link>
+                    <Link href="/go-live" className="text-cyan-400 font-medium hover:text-cyan-300 transition hover:scale-105 duration-200">Go Live</Link>
                 </div>
                 <button onClick={connectWallet} className="bg-white/10 border border-white/10 text-white px-5 py-2 rounded-full font-medium text-sm hover:bg-white/20 transition backdrop-blur-md">
                     {walletAddress ? `...${walletAddress.slice(-4)}` : "Connect Wallet"}
