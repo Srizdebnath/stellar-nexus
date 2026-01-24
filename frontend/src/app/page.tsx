@@ -32,7 +32,7 @@ export default function LandingPage() {
         <div className="hidden md:flex gap-8 text-sm text-gray-400 font-medium">
           <Link href="/marketplace" className="hover:text-white transition hover:scale-105 duration-200">Marketplace</Link>
           <Link href="/pipeline" className="hover:text-white transition hover:scale-105 duration-200">Pipeline</Link>
-          <a href="#" className="hover:text-white transition hover:scale-105 duration-200">Docs</a>
+          <Link href="/docs" className="hover:text-white transition hover:scale-105 duration-200">Docs</Link>
         </div>
         <button onClick={connectWallet} className="bg-white/5 border border-white/10 text-white px-5 py-2 rounded-full font-medium text-sm hover:bg-white/10 transition backdrop-blur-md">
           {walletAddress ? `Connected: ${walletAddress.slice(0, 4)}...` : "Connect Wallet"}

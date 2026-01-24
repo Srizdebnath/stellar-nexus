@@ -6,17 +6,17 @@ import { Networks } from '@stellar/stellar-sdk';
 import { X, Lock, Download, Rocket, CheckCircle, BrainCircuit, Search, Layers } from 'lucide-react';
 import MarketplaceScene from '../../components/MarketplaceScene';
 
-// ✅ IMPORT YOUR V4 CONTRACT BINDINGS
+
 import { Client } from "../../contracts/nexus_v4/src";
 import Link from 'next/link';
 
-// 🛑 CONFIGURATION: PASTE YOUR V4 CONTRACT ID HERE
+
 const CONTRACT_ID = "CC6MG2FDXFJYOAHRNSB6RVSUWDDYS6HV6FCUB4ESNISK575GS4WMBVAJ";
 
-// 💰 PASTE YOUR CREATOR WALLET HERE
+
 const CREATOR_WALLET = "GBKPWDVU4MJQ4JPMMYWOFTKAGQCSGOWC4MRHMS4VXUJSJJ6HYZBG2OPH";
 
-// --- DATA: MARKETPLACE LISTING ---
+
 const APPLETS = [
   {
     id: 1,
@@ -60,7 +60,7 @@ const APPLETS = [
   }
 ];
 
-// --- HELPER: CONVERT BYTES TO HEX ---
+
 const toHex = (buffer: Uint8Array | number[]) => {
   return Array.from(new Uint8Array(buffer))
     .map(b => b.toString(16).padStart(2, '0'))
@@ -290,7 +290,7 @@ export default function Home() {
         <div className="hidden md:flex gap-8 text-sm text-gray-400 font-medium">
           <Link href="/marketplace" className="text-white font-medium">Marketplace</Link>
           <Link href="/pipeline" className="hover:text-white transition hover:scale-105 duration-200">Pipeline</Link>
-          <a href="#" className="hover:text-white transition hover:scale-105 duration-200">Docs</a>
+          <Link href="/docs" className="hover:text-white transition hover:scale-105 duration-200">Docs</Link>
         </div>
         <button onClick={connectWallet} className="bg-white/10 border border-white/10 text-white px-5 py-2 rounded-full font-medium text-sm hover:bg-white/20 transition backdrop-blur-md">
           {walletAddress ? `Connected: ${walletAddress.slice(0, 4)}...` : "Connect Wallet"}
