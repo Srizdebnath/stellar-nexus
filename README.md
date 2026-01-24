@@ -107,15 +107,15 @@ A fun, visual demonstration of string manipulation capabilities.
 
 
 ### Landing Page View
-![](/screenshots/land.png)
+![](public/screenshots/land.png)
 *Landing page for Stellar Nexus.*
 
 ### Marketplace View
-![](/screenshots/mar.png)
+![](public/screenshots/mar.png)
 *Discover and purchase verified applets.*
 
 ### Nexus AI Chat
-![](/screenshots/nexus.png)
+![](public/screenshots/nexus.png)
 *Generate optimized Soroban Rust code instantly.*
 
 ---
