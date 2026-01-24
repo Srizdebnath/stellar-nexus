@@ -73,49 +73,26 @@ export default function GoLivePage() {
         if (!name) setName("Nexus Applet");
 
         try {
-            // Attempt to fetch from custom LLM
-            const response = await fetch("https://sriz-nexus-ai-server.hf.space", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
+            const apiUrl = process.env.NEXT_PUBLIC_AI_API_URL || 'http://localhost:7860';
+            const response = await fetch(`${apiUrl}/api/generate-code`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ prompt }),
             });
 
-            if (!response.ok) {
-                throw new Error(`AI Server Error: ${response.statusText}`);
-            }
-
+            if (!response.ok) throw new Error('AI server response error');
             const data = await response.json();
-            // Assume the server returns { code: "..." } or similar. Adjust if needed.
-            // If the server returns raw text, use response.text()
-            const generatedCode = data.code || data.text || data;
 
-            if (typeof generatedCode !== 'string') {
-                throw new Error("Invalid response format from AI Node");
+            if (data.code) {
+                simulateTyping(data.code);
+            } else {
+                throw new Error("Invalid response from AI server");
             }
-
-            simulateTyping(generatedCode);
 
         } catch (error) {
-            console.error("AI Generation Failed:", error);
-            // Fallback to simulation for demo continuity if network fails
-            const fallbackCode = `
-#![no_std]
-use soroban_sdk::{contract, contractimpl, symbol_short, Env, Symbol};
-
-#[contract]
-pub struct NexusApplet;
-
-#[contractimpl]
-impl NexusApplet {
-    /// Note: AI Server Unreachable. Using Offline Fallback.
-    /// Prompt: ${prompt}
-    pub fn execute(env: Env, input: u64) -> u64 {
-        input + 1
-    }
-}
-`;
-            simulateTyping(fallbackCode);
-            alert("Connected to custom AI Node failed, using offline fallback. Check console.");
+            console.error(error);
+            alert("AI code generation failed. Ensure your AI Node is running or env vars are set.");
+            setIsGenerating(false);
         }
     };
 
