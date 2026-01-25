@@ -5,6 +5,8 @@
 [![Powered by Stellar](https://img.shields.io/badge/Powered_by-Stellar_Soroban-purple?style=for-the-badge&logo=stellar)](https://stellar.org/)
 [![Custom LLM](https://img.shields.io/badge/AI-Nexus_LLM-blue?style=for-the-badge&logo=huggingface)](https://sriz-nexus-ai-server.hf.space)
 
+[![Demo Video](https://img.shields.io/badge/Watch-Demo_Video-red?style=for-the-badge&logo=youtube)](https://youtu.be/LA9Ktr17tBw?si=iMmkW1Z0YOpIGPUm)
+
 ---
 
 ## 🚀 Overview
