@@ -44,74 +44,73 @@ export default function DashboardPage() {
         try {
             const server = new StellarSdk.rpc.Server(SOROBAN_RPC_URL);
 
-            // 1. Get Total Count
-            const countTx = await server.prepareTransaction(
-                new StellarSdk.TransactionBuilder(
-                    new StellarSdk.Account(address, "0"), // Read-only, sequence 0
-                    { fee: StellarSdk.BASE_FEE, networkPassphrase: NETWORK_PASSPHRASE }
-                )
-                    .addOperation(StellarSdk.Operation.invokeHostFunction({
-                        func: StellarSdk.xdr.HostFunction.hostFunctionTypeInvokeContract(
-                            new StellarSdk.xdr.InvokeContractArgs({
-                                contractAddress: new StellarSdk.Address(CONTRACT_ID).toScAddress(),
-                                functionName: "get_listing_count",
-                                args: []
-                            })
-                        ),
-                        auth: []
-                    }))
-                    .setTimeout(30)
-                    .build()
-            );
+            // 1. Get Total Count via SimulateTransaction
+            // Using a dummy account for simulation is cleaner than using the user's account with sequence 0
+            const dummyKey = StellarSdk.Keypair.random();
+            const source = new StellarSdk.Account(dummyKey.publicKey(), "0");
 
-            // Parse result to get count
+            const countTx = new StellarSdk.TransactionBuilder(
+                source,
+                { fee: StellarSdk.BASE_FEE, networkPassphrase: NETWORK_PASSPHRASE }
+            )
+                .addOperation(StellarSdk.Operation.invokeHostFunction({
+                    func: StellarSdk.xdr.HostFunction.hostFunctionTypeInvokeContract(
+                        new StellarSdk.xdr.InvokeContractArgs({
+                            contractAddress: new StellarSdk.Address(CONTRACT_ID).toScAddress(),
+                            functionName: "get_listing_count",
+                            args: []
+                        })
+                    ),
+                    auth: []
+                }))
+                .setTimeout(30)
+                .build();
+
+            const sim = await server.simulateTransaction(countTx);
+
             let totalCount = 0;
-            // @ts-ignore
-            if (countTx.returnValue) {
+            if (StellarSdk.rpc.Api.isSimulationSuccess(sim)) {
                 // @ts-ignore
-                totalCount = Number(StellarSdk.scValToNative(countTx.returnValue));
+                const result = sim.result.retval;
+                totalCount = Number(StellarSdk.scValToNative(result));
             }
 
             console.log("Total Listings on Contract:", totalCount);
 
-            // 2. Fetch All Listings and Filter by Owner
-            // Note: In a production app, you'd want an indexer. usage of Promise.all for parallel fetching
-            // Fetching in reverse to show newest first
-
+            // 2. Fetch All Listings
             const fetchedListings = [];
-            const maxFetch = 20; // Limit to last 20 for demo performance
+            const maxFetch = 20;
             const startId = totalCount;
             const endId = Math.max(1, totalCount - maxFetch);
 
             for (let i = startId; i >= endId; i--) {
                 try {
-                    const tx = await server.prepareTransaction(
-                        new StellarSdk.TransactionBuilder(
-                            new StellarSdk.Account(address, "0"),
-                            { fee: StellarSdk.BASE_FEE, networkPassphrase: NETWORK_PASSPHRASE }
-                        )
-                            .addOperation(StellarSdk.Operation.invokeHostFunction({
-                                func: StellarSdk.xdr.HostFunction.hostFunctionTypeInvokeContract(
-                                    new StellarSdk.xdr.InvokeContractArgs({
-                                        contractAddress: new StellarSdk.Address(CONTRACT_ID).toScAddress(),
-                                        functionName: "get_listing",
-                                        args: [StellarSdk.nativeToScVal(i, { type: 'u64' })]
-                                    })
-                                ),
-                                auth: []
-                            }))
-                            .setTimeout(30)
-                            .build()
-                    );
+                    const tx = new StellarSdk.TransactionBuilder(
+                        source,
+                        { fee: StellarSdk.BASE_FEE, networkPassphrase: NETWORK_PASSPHRASE }
+                    )
+                        .addOperation(StellarSdk.Operation.invokeHostFunction({
+                            func: StellarSdk.xdr.HostFunction.hostFunctionTypeInvokeContract(
+                                new StellarSdk.xdr.InvokeContractArgs({
+                                    contractAddress: new StellarSdk.Address(CONTRACT_ID).toScAddress(),
+                                    functionName: "get_listing",
+                                    args: [StellarSdk.nativeToScVal(i, { type: 'u64' })]
+                                })
+                            ),
+                            auth: []
+                        }))
+                        .setTimeout(30)
+                        .build();
+
+                    const itemSim = await server.simulateTransaction(tx);
 
                     // @ts-ignore
-                    if (tx.returnValue) {
+                    if (StellarSdk.rpc.Api.isSimulationSuccess(itemSim)) {
                         // @ts-ignore
-                        const listing = StellarSdk.scValToNative(tx.returnValue);
+                        const listing = StellarSdk.scValToNative(itemSim.result.retval);
 
                         console.log(`Fetched listing ${i}:`, listing);
 
-                        // Robust Address Comparison
                         const listingOwner = listing.owner.toString();
                         const currentUser = address.toString();
 
@@ -164,6 +163,9 @@ export default function DashboardPage() {
                     <div>
                         <h1 className="text-4xl font-bold mb-2">Owner Dashboard</h1>
                         <p className="text-zinc-400">Manage your deployed applets and sales.</p>
+                        <p className="text-zinc-600 text-xs font-mono mt-2 flex items-center gap-2">
+                            Contract: {CONTRACT_ID.slice(0, 6)}...{CONTRACT_ID.slice(-6)}
+                        </p>
                     </div>
                     <button onClick={() => walletAddress && fetchListings(walletAddress)} className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition" title="Refresh">
                         <RefreshCw className={`w-5 h-5 text-gray-400 ${isLoading ? 'animate-spin' : ''}`} />

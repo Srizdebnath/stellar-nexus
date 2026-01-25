@@ -22,7 +22,7 @@ export default function GoLivePage() {
 
     // Listing State
     const [isListing, setIsListing] = useState(false);
-    const [listStatus, setListStatus] = useState<'idle' | 'signing' | 'uploading' | 'success'>('idle');
+    const [listStatus, setListStatus] = useState<'idle' | 'signing' | 'uploading' | 'confirming' | 'success'>('idle');
     const [txHash, setTxHash] = useState("");
 
     // Wallet State
@@ -184,8 +184,29 @@ export default function GoLivePage() {
                 alert(msg);
                 setListStatus('idle');
             } else {
-                setTxHash(result.hash);
-                setListStatus('success');
+                // 🛑 NEW: Poll for Confirmation
+                setListStatus('confirming');
+                const txHash = result.hash;
+                setTxHash(txHash);
+
+                let isConfirmed = false;
+                let attempts = 0;
+                while (!isConfirmed && attempts < 20) { // Wait up to 20-30s
+                    await new Promise(r => setTimeout(r, 1500));
+                    const txInfo = await server.getTransaction(txHash);
+                    if (txInfo.status === "SUCCESS") {
+                        isConfirmed = true;
+                    } else if (txInfo.status === "FAILED") {
+                        throw new Error("Transaction Failed On-Chain!");
+                    }
+                    attempts++;
+                }
+
+                if (isConfirmed) {
+                    setListStatus('success');
+                } else {
+                    throw new Error("Transaction Timed Out (Check Explorer)");
+                }
             }
 
         } catch (e: any) {
@@ -304,6 +325,7 @@ export default function GoLivePage() {
                                 {listStatus === 'idle' && "Ready to list on-chain"}
                                 {listStatus === 'signing' && "Waiting for signature..."}
                                 {listStatus === 'uploading' && "Registering on Testnet..."}
+                                {listStatus === 'confirming' && <span className="text-yellow-400">Confirming Transaction...</span>}
                                 {listStatus === 'success' && <span className="text-green-400">Successfully Listed! Tx: <a href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} target="_blank" className="underline">View</a></span>}
                             </div>
                             <button
