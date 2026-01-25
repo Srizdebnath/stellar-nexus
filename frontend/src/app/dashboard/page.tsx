@@ -108,8 +108,14 @@ export default function DashboardPage() {
                     if (tx.returnValue) {
                         // @ts-ignore
                         const listing = StellarSdk.scValToNative(tx.returnValue);
-                        // Filter for current user
-                        if (listing.owner === address) {
+
+                        console.log(`Fetched listing ${i}:`, listing);
+
+                        // Robust Address Comparison
+                        const listingOwner = listing.owner.toString();
+                        const currentUser = address.toString();
+
+                        if (listingOwner === currentUser) {
                             fetchedListings.push(listing);
                         }
                     }
