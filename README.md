@@ -4,148 +4,216 @@
 [![Live on Vercel](https://img.shields.io/badge/Live-Vercel-black?style=for-the-badge&logo=vercel)](https://stellar-nexus.vercel.app/)
 [![Powered by Stellar](https://img.shields.io/badge/Powered_by-Stellar_Soroban-purple?style=for-the-badge&logo=stellar)](https://stellar.org/)
 [![Custom LLM](https://img.shields.io/badge/AI-Nexus_LLM-blue?style=for-the-badge&logo=huggingface)](https://sriz-nexus-ai-server.hf.space)
-
 [![Demo Video](https://img.shields.io/badge/Watch-Demo_Video-red?style=for-the-badge&logo=youtube)](https://youtu.be/LA9Ktr17tBw?si=iMmkW1Z0YOpIGPUm)
 
 ---
 
-## 🚀 Overview
-
-**Stellar Nexus** is a Web3 infrastructure platform that democratizes access to serverless logic on the Stellar network. We solve the problem of fragmented and expensive smart contract development by providing a **Decentralized Compute Marketplace**.
-
-Developers can deploy reusable logic units called **"Applets"** (from simple text processors to complex cryptographic has generators), and other users can discover, buy, and chain these applets together to build automated pipelines without managing a single server.
-
-All of this is powered by our custom **Nexus AI**, a specialized LLM trained to generate gas-optimized Soroban Rust code.
-
----
-
-## 🧠 Our Custom AI Model
-
-We have developed a proprietary Large Language Model specifically for the Soroban ecosystem.
-
-- **Model**: Llama 3.3 (1B Parameter)
-- **Specialization**: Fine-tuned on a dataset of gas-efficient Rust Soroban smart contracts.
-- **Performance**: Achieves **93% accuracy** in generating valid, optimized executables.
-- **Link**: [Try Nexus AI (Direct Server Link)](https://sriz-nexus-ai-server.hf.space)
-
-This integrated AI agent assists developers in writing secure and efficient contracts instantly, reducing the barrier to entry for the Stellar ecosystem.
+## 📖 Table of Contents
+- [Project Description](#-project-description)
+- [Problem Statement](#-problem-statement)
+- [Features](#-features)
+- [Architecture Overview](#-architecture-overview)
+- [Getting Started](#-getting-started)
+- [Usage Guide](#-usage-guide)
+- [Smart Contracts](#-smart-contracts)
+- [Screenshots](#-screenshots)
+- [Future Scope & Plans](#-future-scope--plans)
+- [Tech Stack](#-tech-stack)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ---
 
-## 🏗️ Architecture
+## 🚀 Project Description
 
-The Stellar Nexus platform consists of three core pillars working in unison:
+**Stellar Nexus** is a Web3 infrastructure platform that democratizes access to serverless logic on the Stellar network. It functions as a decentralized marketplace where developers can monetize their Soroban smart contracts ("Applets"), and users can discover, purchase, and execute these verified logic units to build automated pipelines without managing local servers.
+
+---
+
+## ❓ Problem Statement
+
+Smart contract development on Stellar (Soroban) is powerful but often fragmented and intimidating for newcomers.
+1.  **High Barrier to Entry**: Writing secure Rust contracts requires specialized knowledge.
+2.  **Lack of Reusability**: Developers often rewrite the same utility functions (hashing, data processing) from scratch.
+3.  **No Monetization for Utilities**: Creators of useful micro-contracts have no easy way to list them for others to use and pay for.
+
+**Stellar Nexus solves this by:**
+*   Providing an **AI-powered assistant** to generate code.
+*   Creating a **Marketplace** for buying/selling existing logic.
+*   Enabling **No-Code Execution** of complex contracts directly from the UI.
+
+---
+
+## ✨ Features
+
+*   **🛒 Decentralized Marketplace**: Buy and sell Soroban smart contracts using XLM.
+*   **🤖 Nexus AI Assistant**: A custom-trained Llama 3.3 model that generates gas-optimized Rust/Soroban code instantly.
+*   **⚡ Live Execution Environment**: Run smart contracts (e.g., Text Processor, Hash Generator) directly from the browser without installing a CLI.
+*   **📂 Pipeline Builder**: Chain multiple applets together (coming soon) to create complex workflows.
+*   **🔐 Freighter Wallet Integration**: Seamless sign-in and transaction signing.
+*   **💎 Ownership Dashboard**: Manage your deployed applets and track sales.
+
+---
+
+## 🏗️ Architecture Overview
+
+The platform consists of three core pillars:
 
 ```mermaid
 graph TD
-    subgraph Frontend [User Interface]
-        UI[Next.js Web App]
+    subgraph Frontend [Next.js App]
+        UI[Marketplace UI]
         Wallet[Freighter Wallet]
     end
 
-    subgraph Backend [AI & Server]
-        API[Node.js Express Server]
-        LLM[Custom Llama 3.3 Model]
-        HF[Hugging Face Space]
+    subgraph Backend [Nexus AI]
+        API[Node.js Server]
+        LLM[Llama 3.3 Model]
     end
 
-    subgraph Blockchain [Stellar Soroban Network]
-        Market[Nexus Marketplace Contract]
-        App1[Text Processor Contract]
-        App2[Hash Generator Contract]
-        App3[ASCII Art Contract]
+    subgraph Blockchain [Soroban Contracts]
+        Market[Marketplace Contract]
+        App1[Text Processor]
+        App2[Hash Generator]
     end
 
-    Wallet -->|Sign Transactions| UI
-    UI -->|List/Buy Applets| Market
-    UI -->|Execute Logic| App1
-    UI -->|Execute Logic| App2
+    Wallet -->|Sign| UI
+    UI -->|List/Buy| Market
     UI -->|Generate Code| API
     API -->|Prompt| LLM
-    Market -->|Manage Meta Data| Blockchain
+    UI -->|Execute| App1
+    UI -->|Execute| App2
 ```
 
-1.  **Frontend**: A responsive Next.js application built with Tailwind CSS, offering a seamless interface for the marketplace and pipeline builder.
-2.  **Backend (Nexus AI)**: A dedicated Node.js server hosting our fine-tuned Llama 3.3 model, capable of generating Rust code on demand.
-3.  **Blockchain**: Soroban smart contracts that handle logic execution, ownership, and marketplace transactions.
-
----
-
-## 📜 Contract Addresses & Functions
-
-Stellar Nexus relies on a suite of deployed contracts. Below is the registry of all active contracts in our ecosystem:
-
-### 1. Main Marketplace Contract
-**Address**: `CAAQBQS5XV4KB3TKY4CLLEXGQL2Y43D5HG2JPVKKBQ7CWYK2YXT7M5LE`
-
-This is the heart of the platform. It handles:
-- **`list_applet`**: Allows developers to list their code for sale.
-- **`buy_applet`**: Facilitates the purchase of applet rights (transferring XLM/Assets).
-- **`get_listing`**: Retrieves details about available applets.
-- **`get_next_id` / `get_listing_count`**: Manages the global state of the marketplace.
-
-### 2. Text Processor Applet
-**Address**: `CBBGXGBFGKRNPETQH6AKBWIHPC7HM5IJFOB7YOIT34QWYBWHVYJUAE5Z`
-
-A utility contract for basic string manipulation.
-- **`get_stats(text: String)`**: Returns the length and basic metadata of the input string.
-- **`execute(text: String)`**: A verification function that stamps the input with "Verified on Stellar Nexus".
-
-### 3. Hash Generator Applet
-**Address**: `CDHQIJJJIP2QRH7EGLEJFPGJ7JD3XAWUN43Y3CXVCZX2JYDPG6C5YQ2J`
-
-A cryptographic tool for on-chain verification.
-- **`generate_hash(text: String)`**: Converts any input string into a standard SHA-256 hash (`BytesN<32>`). useful for data integrity checks on-chain.
-
-### 4. ASCII Art Generator
-**Address**: `CC6MG2FDXFJYOAHRNSB6RVSUWDDYS6HV6FCUB4ESNISK575GS4WMBVAJ`
-
-A fun, visual demonstration of string manipulation capabilities.
-- **`generate_art(text: String)`**: returns a vector of strings representing the input text framed in a retro ASCII art border.
-
----
-
-## 📸 Screenshots
-
-
-### Landing Page View
-![](public/screenshots/land.png)
-*Landing page for Stellar Nexus.*
-
-### Marketplace View
-![](public/screenshots/mar.png)
-*Discover and purchase verified applets.*
-
-### Nexus AI Chat
-![](public/screenshots/nexus.png)
-*Generate optimized Soroban Rust code instantly.*
-
----
-
-## 🛠 Tech Stack
-
-- **Frontend**: Next.js 16, Tailwind CSS, Framer Motion
-- **Smart Contracts**: Rust, Soroban SDK
-- **AI Engine**: Llama.cpp, Node.js, Express
-- **Wallet**: Freighter
+1.  **Frontend**: Next.js 16 + Tailwind CSS.
+2.  **AI Engine**: Custom Fine-tuned Llama 3.3 (hosted on Hugging Face).
+3.  **Smart Contracts**: Soroban (Rust).
 
 ---
 
 ## 🏁 Getting Started
 
-1. **Clone the repo**
-   ```bash
-   git clone https://github.com/Srizdebnath/stellar-nexus.git
-   ```
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
-3. **Run Development Server**
-   ```bash
-   npm run dev
-   ```
-4. **Deploy Contracts**
-   ```bash
-   stellar contract deploy --wasm target/wasm32-unknown-unknown/release/stellar_nexus.wasm
-   ```
+Follow these instructions to set up the project locally.
+
+### Prerequisites
+
+Ensure you have the following installed:
+*   [Node.js](https://nodejs.org/) (v18 or higher)
+*   [Rust & Cargo](https://rustup.rs/) (for contract development)
+*   [Soroban CLI](https://soroban.stellar.org/docs/getting-started/setup)
+*   [Freighter Wallet Extension](https://www.freighter.app/)
+
+### Installation
+
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/your-username/stellar-nexus.git
+    cd stellar-nexus
+    ```
+
+2.  **Install Frontend Dependencies**
+    ```bash
+    cd frontend
+    npm install
+    ```
+
+3.  **Set Environment Variables**
+    Create a `.env.local` file in the `frontend` directory:
+    ```env
+    NEXT_PUBLIC_HORIZON_URL=https://horizon-testnet.stellar.org
+    NEXT_PUBLIC_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
+    NEXT_PUBLIC_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
+    ```
+
+### Running the Application
+
+1.  **Start the Development Server**
+    ```bash
+    npm run dev
+    ```
+
+2.  **Open in Browser**
+    Navigate to [http://localhost:3000](http://localhost:3000).
+
+---
+
+## 🎮 Usage Guide
+
+### 1. Connecting Wallet
+*   Click the **"Connect Wallet"** button in the top right corner.
+*   Approve the connection in your Freighter extension.
+*   Ensure you are on **Testnet**.
+
+### 2. Marketplace
+*   Browse available applets (Text Processor, Hash Generator, etc.).
+*   Click **"View Details"** or **"Buy License"** to inspect an applet.
+*   Pay with **XLM** to acquire usage rights (if applicable).
+
+### 3. AI Nexus
+*   Go to the **AI Nexus** tab.
+*   Enter a prompt describing the smart contract you want (e.g., "Create a voting contract").
+*   The AI will generate the Rust code, which you can copy or deploy.
+
+---
+
+## 📜 Smart Contracts
+
+Key contracts deployed on the **Stellar Testnet**:
+
+| Contract Name | Address |
+| :--- | :--- |
+| **Marketplace** | `CAAQBQS5XV4KB3TKY4CLLEXGQL2Y43D5HG2JPVKKBQ7CWYK2YXT7M5LE` |
+| **Text Processor** | `CBBGXGBFGKRNPETQH6AKBWIHPC7HM5IJFOB7YOIT34QWYBWHVYJUAE5Z` |
+| **Hash Generator** | `CDHQIJJJIP2QRH7EGLEJFPGJ7JD3XAWUN43Y3CXVCZX2JYDPG6C5YQ2J` |
+| **ASCII Art** | `CC6MG2FDXFJYOAHRNSB6RVSUWDDYS6HV6FCUB4ESNISK575GS4WMBVAJ` |
+
+---
+
+## 📸 Screenshots
+
+### 1. Landing Page
+![](public/screenshots/land.png)
+
+### 2. Marketplace & Live Execution
+![](public/screenshots/mar.png)
+
+### 3. AI Code Generator
+![](public/screenshots/nexus.png)
+
+---
+
+## 🔗 Deployed Link
+
+**Live App**: [https://stellar-nexus.vercel.app/](https://stellar-nexus.vercel.app/)
+
+---
+
+## 🔮 Future Scope & Plans
+
+1.  **No-Code Pipeline Builder**: A drag-and-drop interface to chain applets (e.g., "Take User Input" -> "Hash It" -> "Store on Chain").
+2.  **Mainnet Launch**: Migration from Testnet to Stellar Mainnet.
+3.  **Developer SDK**: A JavaScript SDK for developers to integrate Nexus applets into their own dApps.
+4.  **Reputation System**: On-chain verification and rating for applet creators.
+5.  **Cross-Chain Support**: Bridge logic execution to other WASM-compatible chains.
+
+---
+
+## 🛠 Tech Stack
+
+*   **Frontend**: Next.js 16, Tailwind CSS, Lucide Icons
+*   **Blockchain**: Rust, Soroban SDK, Stellar Freighter
+*   **AI**: Llama 3.3, Node.js, Express
+*   **Deployment**: Vercel (Frontend), Soroban Testnet (Contracts), Hugging Face (AI)
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+1.  Fork the repository.
+2.  Create a new branch (`git checkout -b feature/YourFeature`).
+3.  Commit your changes (`git commit -m 'Add some feature'`).
+4.  Push to the branch (`git push origin feature/YourFeature`).
+5.  Open a Pull Request.
+
+---
