@@ -142,3 +142,32 @@ impl NexusContract {
         art
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use soroban_sdk::{Env, String};
+
+    #[test]
+    fn test_get_stats() {
+        let env = Env::default();
+        let text = String::from_str(&env, "hello");
+        assert_eq!(NexusContract::get_stats(env, text), 5);
+    }
+
+    #[test]
+    fn test_execute() {
+        let env = Env::default();
+        let text = String::from_str(&env, "run");
+        let res = NexusContract::execute(env, text);
+        assert_eq!(res.len(), 2);
+    }
+
+    #[test]
+    fn test_generate_art() {
+        let env = Env::default();
+        let text = String::from_str(&env, "art");
+        let res = NexusContract::generate_art(env, text);
+        assert_eq!(res.len(), 5);
+    }
+}

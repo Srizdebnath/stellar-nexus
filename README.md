@@ -180,6 +180,9 @@ Key contracts deployed on the **Stellar Testnet**:
 ### 3. AI Code Generator
 ![](public/screenshots/nexus.png)
 
+### 4. Smart Contract Tests Passing
+![](public/screenshots/testpass.png)
+
 ---
 
 ## 🔗 Deployed Link
