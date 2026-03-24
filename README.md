@@ -190,7 +190,6 @@ Key contracts deployed on the **Stellar Testnet**:
 ### 5. Mobile Responsive View
 <img src="public/screenshots/mobile.png" width="300" alt="Mobile View Screenshot" />
 
-*(Please update `public/screenshots/mobile.png` with your actual mobile screenshot!)*
 
 ---
 
