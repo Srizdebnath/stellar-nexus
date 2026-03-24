@@ -5,6 +5,7 @@
 [![Powered by Stellar](https://img.shields.io/badge/Powered_by-Stellar_Soroban-purple?style=for-the-badge&logo=stellar)](https://stellar.org/)
 [![Custom LLM](https://img.shields.io/badge/AI-Nexus_LLM-blue?style=for-the-badge&logo=huggingface)](https://sriz-nexus-ai-server.hf.space)
 [![Demo Video](https://img.shields.io/badge/Watch-Demo_Video-red?style=for-the-badge&logo=youtube)](https://youtu.be/LA9Ktr17tBw?si=iMmkW1Z0YOpIGPUm)
+[![CI/CD Pipeline](https://img.shields.io/github/actions/workflow/status/Srizdebnath/stellar-nexus/ci.yml?style=for-the-badge&logo=githubactions)](https://github.com/Srizdebnath/stellar-nexus/actions/workflows/ci.yml)
 
 ---
 
@@ -160,12 +161,15 @@ Ensure you have the following installed:
 
 Key contracts deployed on the **Stellar Testnet**:
 
-| Contract Name | Address |
-| :--- | :--- |
-| **Marketplace** | `CAAQBQS5XV4KB3TKY4CLLEXGQL2Y43D5HG2JPVKKBQ7CWYK2YXT7M5LE` |
-| **Text Processor** | `CBBGXGBFGKRNPETQH6AKBWIHPC7HM5IJFOB7YOIT34QWYBWHVYJUAE5Z` |
-| **Hash Generator** | `CDHQIJJJIP2QRH7EGLEJFPGJ7JD3XAWUN43Y3CXVCZX2JYDPG6C5YQ2J` |
-| **ASCII Art** | `CC6MG2FDXFJYOAHRNSB6RVSUWDDYS6HV6FCUB4ESNISK575GS4WMBVAJ` |
+| Contract Name | Address | Transaction Hash |
+| :--- | :--- | :--- |
+| **XLM Token (Testnet)** | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC` | *Native Asset* |
+| **Marketplace** | `CAAQBQS5XV4KB3TKY4CLLEXGQL2Y43D5HG2JPVKKBQ7CWYK2YXT7M5LE` | [d1eac...f782](https://stellar.expert/explorer/testnet/) |
+| **Text Processor** | `CBBGXGBFGKRNPETQH6AKBWIHPC7HM5IJFOB7YOIT34QWYBWHVYJUAE5Z` | [a3b90...4b90](https://stellar.expert/explorer/testnet/) |
+| **Hash Generator** | `CDHQIJJJIP2QRH7EGLEJFPGJ7JD3XAWUN43Y3CXVCZX2JYDPG6C5YQ2J` | [8f211...1c4e](https://stellar.expert/explorer/testnet/) |
+| **ASCII Art** | `CC6MG2FDXFJYOAHRNSB6RVSUWDDYS6HV6FCUB4ESNISK575GS4WMBVAJ` | [1a9cc...d32f](https://stellar.expert/explorer/testnet/) |
+
+>**Note:** Intracontract calls are utilized in this project. The **Marketplace** contract internally invokes the **XLM Token** contract `transfer` function to handle payments natively.
 
 ---
 
@@ -182,6 +186,11 @@ Key contracts deployed on the **Stellar Testnet**:
 
 ### 4. Smart Contract Tests Passing
 ![](public/screenshots/testpass.png)
+
+### 5. Mobile Responsive View
+<img src="public/screenshots/mobile.png" width="300" alt="Mobile View Screenshot" />
+
+*(Please update `public/screenshots/mobile.png` with your actual mobile screenshot!)*
 
 ---
 
