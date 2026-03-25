@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Send, Play, Zap, Code, CheckCircle, Loader2, FileCode, Wallet } from 'lucide-react';
+import { Send, Play, Zap, Code, CheckCircle, Loader2, FileCode, Wallet, Download } from 'lucide-react';
 import MarketplaceScene from '../../components/MarketplaceScene';
 import { isAllowed, setAllowed, requestAccess, signTransaction } from '@stellar/freighter-api';
 import * as StellarSdk from '@stellar/stellar-sdk';
@@ -216,6 +216,18 @@ export default function GoLivePage() {
         }
         setIsListing(false);
     };
+    const handleDownload = () => {
+        if (!code) return;
+        const blob = new Blob([code], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${name || 'nexus_applet'}.rs`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
 
     return (
         <main className="min-h-screen bg-[#050505] text-white font-sans selection:bg-cyan-500/30 overflow-hidden relative flex flex-col">
@@ -328,26 +340,34 @@ export default function GoLivePage() {
                                 {listStatus === 'confirming' && <span className="text-yellow-400">Confirming Transaction...</span>}
                                 {listStatus === 'success' && <span className="text-green-400">Successfully Listed! Tx: <a href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} target="_blank" className="underline">View</a></span>}
                             </div>
-                            <button
-                                onClick={handleList}
-                                disabled={!code || !name || isListing || listStatus === 'success'}
-                                className={`
-                                    px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition
-                                    ${listStatus === 'success' ? 'bg-green-600 text-white' : 'bg-cyan-600 hover:bg-cyan-500 text-white'}
-                                    disabled:opacity-50 disabled:cursor-not-allowed
-                                `}
-                            >
-                                {isListing ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : listStatus === 'success' ? (
-                                    <CheckCircle className="w-4 h-4" />
-                                ) : (
-                                    <Play className="w-4 h-4 fill-current" />
-                                )}
-                                {listStatus === 'success' ? "On Sale" : isListing ? "Sign & List" : "Sell Logic"}
-                            </button>
+                                <button
+                                    onClick={handleDownload}
+                                    disabled={!code}
+                                    className="bg-white/5 hover:bg-white/10 text-zinc-400 p-2 rounded-lg transition disabled:opacity-30 border border-white/5"
+                                    title="Download as .rs file"
+                                >
+                                    <Download className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={handleList}
+                                    disabled={!code || !name || isListing || listStatus === 'success'}
+                                    className={`
+                                        px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition
+                                        ${listStatus === 'success' ? 'bg-green-600 text-white' : 'bg-cyan-600 hover:bg-cyan-500 text-white'}
+                                        disabled:opacity-50 disabled:cursor-not-allowed
+                                    `}
+                                >
+                                    {isListing ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : listStatus === 'success' ? (
+                                        <CheckCircle className="w-4 h-4" />
+                                    ) : (
+                                        <Play className="w-4 h-4 fill-current" />
+                                    )}
+                                    {listStatus === 'success' ? "On Sale" : isListing ? "Sign & List" : "Sell Logic"}
+                                </button>
+                            </div>
                         </div>
-                    </div>
                 </div>
             </div>
         </main>
