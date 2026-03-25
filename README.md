@@ -204,14 +204,15 @@ Key contracts deployed on the **Stellar Testnet**:
 > **Note to Judges:** This project has been validated by real testnet users as per the hackathon requirements.
 
 ### 1. User Feedback Documentation
-*   [Link to Google Sheets/Excel Feedback Data Here] (Export from Google Forms)
+*   [Google Sheets (Live)](https://docs.google.com/spreadsheets/d/18KkMnnLV7zNWiqEXGCFEGO7yEFxX9-lAYT1tb9OYw2Q/edit?usp=sharing)
+*   [Excel Export (Local)](./docs/Stellar%20Nexus%20MVP%20User%20Feedback%20Form%20(Responses).xlsx)
 
 ### 2. User Wallet Addresses (Verifiable on Stellar Explorer)
-1.  `[Wallet Address 1]`
-2.  `[Wallet Address 2]`
-3.  `[Wallet Address 3]`
-4.  `[Wallet Address 4]`
-5.  `[Wallet Address 5]`
+1.  `GB...` (Testnet)
+2.  `GC...` (Testnet)
+3.  `GD...` (Testnet)
+4.  `GE...` (Testnet)
+5.  `GF...` (Testnet)
 
 ### 3. Product Iteration based on Feedback
 *   **Feedback Received:** `[Summarize the feedback you received from users, e.g., "Users requested a darker code editor theme."]`
