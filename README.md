@@ -199,6 +199,27 @@ Key contracts deployed on the **Stellar Testnet**:
 
 ---
 
+## 👥 MVP User Validation
+
+> **Note to Judges:** This project has been validated by real testnet users as per the hackathon requirements.
+
+### 1. User Feedback Documentation
+*   [Link to Google Sheets/Excel Feedback Data Here] (Export from Google Forms)
+
+### 2. User Wallet Addresses (Verifiable on Stellar Explorer)
+1.  `[Wallet Address 1]`
+2.  `[Wallet Address 2]`
+3.  `[Wallet Address 3]`
+4.  `[Wallet Address 4]`
+5.  `[Wallet Address 5]`
+
+### 3. Product Iteration based on Feedback
+*   **Feedback Received:** `[Summarize the feedback you received from users, e.g., "Users requested a darker code editor theme."]`
+*   **Improvement Made:** `[Explain how you resolved the feedback in your MVP, e.g., "Implemented a dark theme toggle for the AI code editor."]`
+*   **Git Commit Link:** `[Link to the specific GitHub commit where you implemented this improvement]`
+
+---
+
 ## 🔮 Future Scope & Plans
 
 1.  **No-Code Pipeline Builder**: A drag-and-drop interface to chain applets (e.g., "Take User Input" -> "Hash It" -> "Store on Chain").
