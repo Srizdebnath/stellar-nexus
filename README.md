@@ -208,11 +208,11 @@ Key contracts deployed on the **Stellar Testnet**:
 *   [Excel Export (Local)](./docs/Stellar%20Nexus%20MVP%20User%20Feedback%20Form%20(Responses).xlsx)
 
 ### 2. User Wallet Addresses (Verifiable on Stellar Explorer)
-1.  `GB...` (Testnet)
-2.  `GC...` (Testnet)
-3.  `GD...` (Testnet)
-4.  `GE...` (Testnet)
-5.  `GF...` (Testnet)
+1.  `GA3GIUMIW5UXDUZY6R5MVZQ5IW6U6HVFHBRV2QY2Z2KMNRFRXEPUFTIO` (Testnet)
+2.  `GBTIYHUKI5MYCPEKEKCUMPI54NZNIEC3H4U5PA7VWVV3TDTPNDEWGRUO` (Testnet)
+3.  `GD2NAOP4QNENHXDYDVS3APF734AGEKCQVYSHGHPVAFN4IO3RP5AFHRPY` (Testnet)
+4.  `GCLT3ZVPSKGICZXOF5I5JFLATWGE4BSZCCCLMGC7TO7DJ7IC3U2ZBRUG` (Testnet)
+5.  `GBQUOYUK5SBEOUNSC4JWHNFTBAIHNU2RBDC7OYPRE2LCMH4BD3YHI4ZC` (Testnet)
 
 ### 3. Product Iteration based on Feedback
 *   **Feedback Received:** "Awesome platform! The Rust code generated was actually quite good. Adding an option to export the generated Rust code directly to a .rs file would save a lot of copying and pasting!"
