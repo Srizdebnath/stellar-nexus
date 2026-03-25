@@ -215,9 +215,9 @@ Key contracts deployed on the **Stellar Testnet**:
 5.  `GF...` (Testnet)
 
 ### 3. Product Iteration based on Feedback
-*   **Feedback Received:** `[Summarize the feedback you received from users, e.g., "Users requested a darker code editor theme."]`
-*   **Improvement Made:** `[Explain how you resolved the feedback in your MVP, e.g., "Implemented a dark theme toggle for the AI code editor."]`
-*   **Git Commit Link:** `[Link to the specific GitHub commit where you implemented this improvement]`
+*   **Feedback Received:** "Awesome platform! The Rust code generated was actually quite good. Adding an option to export the generated Rust code directly to a .rs file would save a lot of copying and pasting!"
+*   **Improvement Made:** Implemented a "Download .rs" button in the AI code editor that exports the generated Soroban contract code as a local file.
+*   **Git Commit Link:** [8519783](https://github.com/Srizdebnath/stellar-nexus/commit/8519783)
 
 ---
 
