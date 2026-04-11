@@ -227,15 +227,15 @@ export default function Home() {
   const [isGasless, setIsGasless] = useState(true);
 
   React.useEffect(() => {
-    isAllowed().then((allowed: boolean) => {
-      if (allowed) requestAccess().then((acc: { address: string }) => setWalletAddress(acc?.address || null));
+    isAllowed().then((res) => {
+      if (res.isAllowed) requestAccess().then((acc: { address: string }) => setWalletAddress(acc?.address || null));
     });
     fetchLiveListings();
   }, []);
 
   const connectWallet = async () => {
-    const allowed = await isAllowed();
-    if (!allowed) await setAllowed();
+    const res = await isAllowed();
+    if (!res.isAllowed) await setAllowed();
     const access = await requestAccess();
     if (access?.address) setWalletAddress(access.address);
   };

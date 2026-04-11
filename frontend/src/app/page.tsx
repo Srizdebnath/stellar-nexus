@@ -9,8 +9,8 @@ export default function LandingPage() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
   const connectWallet = async () => {
-    const allowed = await isAllowed();
-    if (!allowed) await setAllowed();
+    const res = await isAllowed();
+    if (!res.isAllowed) await setAllowed();
     const access = await requestAccess();
     if (access?.address) setWalletAddress(access.address);
   };

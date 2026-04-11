@@ -16,8 +16,8 @@ export default function DashboardPage() {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        isAllowed().then(allowed => {
-            if (allowed) {
+        isAllowed().then(res => {
+            if (res.isAllowed) {
                 requestAccess().then(access => {
                     if (access?.address) {
                         setWalletAddress(access.address);
@@ -29,8 +29,8 @@ export default function DashboardPage() {
     }, []);
 
     const connectWallet = async () => {
-        const allowed = await setAllowed();
-        if (allowed) {
+        const res = await setAllowed();
+        if (res.isAllowed) {
             const access = await requestAccess();
             if (access?.address) {
                 setWalletAddress(access.address);
