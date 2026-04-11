@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { isAllowed, setAllowed, requestAccess, signTransaction } from '@stellar/freighter-api';
 import * as StellarSdk from '@stellar/stellar-sdk';
 import { Networks } from '@stellar/stellar-sdk';
-import { X, Lock, Download, Rocket, CheckCircle, BrainCircuit, Search, Layers } from 'lucide-react';
+import { X, Lock, Download, Rocket, CheckCircle, BrainCircuit, Search, Layers, Zap } from 'lucide-react';
 import MarketplaceScene from '../../components/MarketplaceScene';
+import FeeSponsorship from '../../components/FeeSponsorship';
 
 
 import { Client } from "../../contracts/nexus_v4/src";
@@ -222,9 +223,12 @@ export default function Home() {
   const [aiResult, setAiResult] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
 
+  // Advanced Feature: Fee Sponsorship State
+  const [isGasless, setIsGasless] = useState(true);
+
   React.useEffect(() => {
-    isAllowed().then(allowed => {
-      if (allowed) requestAccess().then(acc => setWalletAddress(acc?.address || null));
+    isAllowed().then((allowed: boolean) => {
+      if (allowed) requestAccess().then((acc: { address: string }) => setWalletAddress(acc?.address || null));
     });
     fetchLiveListings();
   }, []);
@@ -477,10 +481,15 @@ export default function Home() {
         <div className="bg-[#09090b]/60 border border-white/5 rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[100px] pointer-events-none"></div>
 
-          <h3 className="text-2xl font-bold mb-8 text-white flex items-center gap-3 relative z-10">
-            <Rocket className="w-6 h-6 text-purple-500" />
-            Live Execution Environment
-          </h3>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+            <h3 className="text-2xl font-bold text-white flex items-center gap-3 relative z-10">
+              <Rocket className="w-6 h-6 text-purple-500" />
+              Live Execution Environment
+            </h3>
+            <div className="w-full md:w-72 relative z-10">
+              <FeeSponsorship enabled={isGasless} onToggle={setIsGasless} />
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
 
