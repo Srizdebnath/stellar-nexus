@@ -133,7 +133,8 @@ export default function GoLivePage() {
                             new StellarSdk.Address(ownerAddress).toScVal(),             // owner
                             StellarSdk.xdr.ScVal.scvString(name),                       // name
                             StellarSdk.nativeToScVal(priceBigInt, { type: "i128" }),    // price
-                            StellarSdk.xdr.ScVal.scvString(code)                        // code
+                            StellarSdk.xdr.ScVal.scvString(code),                       // code
+                            StellarSdk.xdr.ScVal.scvSymbol("Utility")                   // category
                         ]
                     })
                 ),

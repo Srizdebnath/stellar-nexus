@@ -3,12 +3,12 @@ import React, { useState } from 'react';
 import { isAllowed, setAllowed, requestAccess, signTransaction } from '@stellar/freighter-api';
 import * as StellarSdk from '@stellar/stellar-sdk';
 import { Networks } from '@stellar/stellar-sdk';
-import { X, Lock, Download, Rocket, CheckCircle, BrainCircuit, Search, Layers, Zap } from 'lucide-react';
+import { X, Lock, Download, Rocket, CheckCircle, BrainCircuit, Search, Layers, Zap, Star, Tag, MessageSquare, History, Loader2 } from 'lucide-react';
 import MarketplaceScene from '../../components/MarketplaceScene';
 import FeeSponsorship from '../../components/FeeSponsorship';
 
 
-import { Client } from "../../contracts/nexus_v4/src";
+import { Client } from "../../contracts/nexus_v6/src";
 import Link from 'next/link';
 
 
@@ -27,7 +27,11 @@ const APPLETS = [
     description: "[Functions: get_stats, execute] Process and analyze text data on-chain. Returns verified stats.",
     price: "10",
     status: "Active",
-    color: "blue"
+    color: "blue",
+    category: "Utility",
+    rating_sum: 45,
+    rating_count: 5,
+    version: 1,
   },
   {
     id: 2,
@@ -37,7 +41,11 @@ const APPLETS = [
     description: "[Functions: generate_hash] Cryptographic SHA-256 hash generation for any input data.",
     price: "25",
     status: "Active",
-    color: "purple"
+    color: "purple",
+    category: "Security",
+    rating_sum: 20,
+    rating_count: 2,
+    version: 1,
   },
   {
     id: 3,
@@ -47,7 +55,11 @@ const APPLETS = [
     description: "[Functions: generate_art] Generates retro ASCII art frames for your text on-chain.",
     price: "5",
     status: "Active",
-    color: "green"
+    color: "green",
+    category: "Art",
+    rating_sum: 50,
+    rating_count: 5,
+    version: 1,
   },
   {
     id: 4,
@@ -57,7 +69,11 @@ const APPLETS = [
     description: "[Model: Llama 3.2] Custom-trained LLM to generate Soroban Rust code snippets.",
     price: "50",
     status: "Experimental",
-    color: "yellow"
+    color: "yellow",
+    category: "AI",
+    rating_sum: 120,
+    rating_count: 12,
+    version: 1,
   }
 ];
 
@@ -76,6 +92,7 @@ function AppletModal({ applet, onClose, walletAddress }: { applet: any, onClose:
 
   // Parse price safely
   const listingPrice = applet.price ? applet.price.toString() : "0";
+  const rating = applet.rating_count > 0 ? (applet.rating_sum / applet.rating_count).toFixed(1) : "0.0";
 
   const handleDownload = () => {
     // In a real app, this would fetch the WASM or Source based on the code_uri
@@ -98,65 +115,25 @@ function AppletModal({ applet, onClose, walletAddress }: { applet: any, onClose:
     setBuying(true);
 
     try {
-      const server = new StellarSdk.rpc.Server("https://soroban-testnet.stellar.org");
-      const source = await server.getAccount(walletAddress);
-
-      // Verify Owner
-      if (!applet.owner) {
-        throw new Error("Invalid listing: missing owner");
-      }
-      const ownerAddress = applet.owner.toString();
-
-      if (ownerAddress === walletAddress) {
-        alert("You are the owner of this applet!");
-        setBuying(false);
-        return;
-      }
-
-      console.log(`Processing payment of ${listingPrice} XLM to ${ownerAddress}...`);
-
-      // Build the Real Payment Transaction
-      // Note: We use the native token (XLM) for this simple marketplace
-      const transaction = new StellarSdk.TransactionBuilder(source, {
-        fee: StellarSdk.BASE_FEE,
+      const client = new Client({
         networkPassphrase: StellarSdk.Networks.TESTNET,
-      })
-        .addOperation(StellarSdk.Operation.payment({
-          destination: ownerAddress,
-          asset: StellarSdk.Asset.native(),
-          amount: listingPrice,
-        }))
-        .setTimeout(30)
-        .build();
-
-      // Sign with Freighter
-      const signResult = await signTransaction(transaction.toXDR(), {
-        networkPassphrase: StellarSdk.Networks.TESTNET
+        contractId: CONTRACT_ID,
+        rpcUrl: "https://soroban-testnet.stellar.org",
       });
 
-      if (signResult.error) {
-        console.error("Sign Transaction Error:", signResult.error);
-        alert("User cancelled signature.");
-        setBuying(false);
-        return;
-      }
+      console.log(`Processing on-chain purchase for applet #${applet.id}...`);
+      
+      const tx = await client.buy_applet({
+        buyer: walletAddress,
+        listing_id: BigInt(applet.id),
+        token_address: "CAS3J7GYLGXGR6YMG23L6IUAJ65WHD6HLD7EEM6IDU576QTVF6AWLCH7" 
+      });
 
-      // Submit to Network
-      const tx = StellarSdk.TransactionBuilder.fromXDR(signResult.signedTxXdr, StellarSdk.Networks.TESTNET);
-      const result = await server.sendTransaction(tx);
+      const res = await tx.signAndSend();
 
-      if (result.status !== "PENDING") {
-        console.error("Payment Failed", result);
-        alert("Payment Failed on Network.");
-      } else {
-        console.log("Payment Confirmed (Pending Consensus):", result);
-        // SUCCESS PATH
-        setIsPurchased(true);
-        setTimeout(() => {
-          handleDownload();
-          alert(`Payment Sent! Downloading ${applet.name} source code...`);
-        }, 1000);
-      }
+      console.log("Transaction Result:", res);
+      setIsPurchased(true);
+      alert(`Success! Applet #${applet.id} purchased on-chain with fee deduction.`);
 
     } catch (e: any) {
       console.error("Payment Error:", e);
@@ -167,28 +144,49 @@ function AppletModal({ applet, onClose, walletAddress }: { applet: any, onClose:
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-xl p-4">
-      <div className="bg-[#09090b]/80 border border-white/10 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+      <div className="bg-[#09090b]/90 border border-white/10 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
         <div className="p-6 border-b border-white/5 flex justify-between items-start">
-          <div>
-            <div className="flex items-center gap-3 mb-2"><h2 className="text-2xl font-bold text-white">{applet.name}</h2><span className="px-2 py-0.5 text-xs rounded border border-blue-500/30 bg-blue-500/10 text-blue-400">Active</span></div>
-            <p className="text-gray-500 text-sm font-mono">ID: #{applet.id} • Owner: {applet.owner.toString().slice(0, 6)}...</p>
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="text-2xl font-bold text-white">{applet.name}</h2>
+              <span className="px-2 py-0.5 text-[10px] rounded border border-blue-500/30 bg-blue-500/10 text-blue-400 uppercase tracking-widest font-bold">Active</span>
+            </div>
+            <div className="flex items-center gap-4 text-xs font-mono text-zinc-500">
+              <span className="flex items-center gap-1"><Tag className="w-3 h-3"/> {applet.category || "General"}</span>
+              <span className="flex items-center gap-1"><History className="w-3 h-3"/> v{applet.version || 1}</span>
+              <span className="flex items-center gap-1 text-yellow-500/80"><Star className="w-3 h-3 fill-current"/> {rating} ({applet.rating_count || 0} reviews)</span>
+            </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition"><X className="w-6 h-6" /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition p-2 bg-white/5 rounded-lg"><X className="w-6 h-6" /></button>
         </div>
         <div className="px-6 pb-6 pt-4">
-          <p className="text-zinc-300 text-sm mb-6 p-4 bg-white/5 rounded-xl border border-white/5 backdrop-blur-sm leading-relaxed font-mono overflow-auto max-h-40">
-            {applet.code_uri || "No preview available."}
-          </p>
+          <div className="mb-6">
+            <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2 font-bold">Encrypted Logic Hash / Preview</p>
+            <p className="text-zinc-300 text-sm p-4 bg-black/40 rounded-xl border border-white/5 backdrop-blur-sm leading-relaxed font-mono overflow-auto max-h-40 border-l-2 border-l-blue-500">
+                {applet.code_uri || "No source code available for preview."}
+            </p>
+          </div>
+          
+          <div className="bg-white/5 px-4 py-3 rounded-xl border border-white/5 mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-zinc-500" />
+                <span className="text-sm text-zinc-400">Add a review after purchase</span>
+            </div>
+            <div className="flex gap-1">
+                {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 text-zinc-700" />)}
+            </div>
+          </div>
+
           <div className="flex items-center justify-between pt-4 border-t border-white/5">
-            <div><p className="text-xs text-gray-500 mb-1 font-medium uppercase tracking-wider">Price</p><p className="text-2xl font-bold text-white">{listingPrice} XLM</p></div>
+            <div><p className="text-xs text-gray-500 mb-1 font-medium uppercase tracking-wider">Price</p><p className="text-3xl font-bold text-white tracking-tight">{listingPrice} <span className="text-sm font-normal text-zinc-500">XLM</span></p></div>
             <div className="flex gap-3">
               {!isPurchased ? (
-                <button onClick={handleBuyCode} disabled={buying} className="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all hover:scale-105 disabled:opacity-50">
-                  {buying ? "Processing..." : <><Lock className="w-4 h-4" /> Buy Source Code</>}
+                <button onClick={handleBuyCode} disabled={buying} className="px-8 py-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 disabled:opacity-50">
+                  {buying ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Lock className="w-5 h-5" /> Buy License</>}
                 </button>
               ) : (
-                <button onClick={handleDownload} className="px-4 py-2.5 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold flex items-center gap-2 shadow-lg shadow-green-500/20 transition-all hover:scale-105">
-                  <Download className="w-4 h-4" /> Download .rs
+                <button onClick={handleDownload} className="px-8 py-3 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold flex items-center gap-2 shadow-lg shadow-green-500/20 transition-all hover:scale-105">
+                  <Download className="w-5 h-5" /> Download .rs
                 </button>
               )}
             </div>
@@ -304,7 +302,7 @@ export default function Home() {
   };
 
   // Demo Logic
-  const runStatsApplet = async () => { if (!inputText) return; setLoading(true); try { const client = new Client({ networkPassphrase: Networks.TESTNET, contractId: CONTRACT_ID, rpcUrl: "https://soroban-testnet.stellar.org", allowHttp: true, publicKey: walletAddress || undefined }); await client.execute({ text: inputText }, { fee: "10000" }); setResult(`Success!`); } catch (e) { alert("Execution failed."); } setLoading(false); };
+  const runStatsApplet = async () => { if (!inputText) return; setLoading(true); try { const client = new Client({ networkPassphrase: Networks.TESTNET, contractId: CONTRACT_ID, rpcUrl: "https://soroban-testnet.stellar.org", allowHttp: true, publicKey: walletAddress || undefined }); await client.get_stats({ text: inputText }, { fee: "10000" }); setResult(`Success!`); } catch (e) { alert("Execution failed."); } setLoading(false); };
   const runHashApplet = async () => { if (!hashInput) return; setHashLoading(true); try { const client = new Client({ networkPassphrase: Networks.TESTNET, contractId: CONTRACT_ID, rpcUrl: "https://soroban-testnet.stellar.org", allowHttp: true, publicKey: walletAddress || undefined }); const tx = await client.generate_hash({ text: hashInput }, { fee: "10000" }); if (tx && tx.result) { setHashResult("0x" + toHex(tx.result)); } } catch (e) { alert("Hash failed."); } setHashLoading(false); };
   const runArtApplet = async () => {
     if (!artInput) return;
