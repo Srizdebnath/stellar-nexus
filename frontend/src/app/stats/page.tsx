@@ -18,7 +18,7 @@ import {
 import * as StellarSdk from '@stellar/stellar-sdk';
 import MarketplaceScene from '../../components/MarketplaceScene';
 
-const CONTRACT_ID = "CAAQBQS5XV4KB3TKY4CLLEXGQL2Y43D5HG2JPVKKBQ7CWYK2YXT7M5LE";
+const CONTRACT_ID = "CCXCZKXBRSWRTKMB3I2LBWM2BLRVWQ325PCYKKSEQQNY572C55CN3KVQ";
 
 const SERVICES = [
     { name: "Soroban RPC", status: "Healthy", latency: "42ms" },
@@ -112,8 +112,11 @@ export default function StatsPage() {
             const totalDisplayUsers = uniqueUsers.size + 35;
 
             // 3. Fetch Recent Events
+            const latestLedger = await server.getLatestLedger();
+            const startLedger = Math.max(1, latestLedger.sequence - 50); // Fetch recent events
+
             const eventTx = await server.getEvents({
-                startLedger: 0,
+                startLedger,
                 filters: [{
                     type: "contract",
                     contractIds: [CONTRACT_ID]

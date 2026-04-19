@@ -168,10 +168,11 @@ Key contracts deployed on the **Stellar Testnet**:
 | Contract Name | Address | Transaction Hash |
 | :--- | :--- | :--- |
 | **XLM Token (Testnet)** | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC` | *Native Asset* |
-| **Marketplace** | `CAAQBQS5XV4KB3TKY4CLLEXGQL2Y43D5HG2JPVKKBQ7CWYK2YXT7M5LE` | [d1eac...f782](https://stellar.expert/explorer/testnet/) |
-| **Text Processor** | `CBBGXGBFGKRNPETQH6AKBWIHPC7HM5IJFOB7YOIT34QWYBWHVYJUAE5Z` | [a3b90...4b90](https://stellar.expert/explorer/testnet/) |
-| **Hash Generator** | `CDHQIJJJIP2QRH7EGLEJFPGJ7JD3XAWUN43Y3CXVCZX2JYDPG6C5YQ2J` | [8f211...1c4e](https://stellar.expert/explorer/testnet/) |
-| **ASCII Art** | `CC6MG2FDXFJYOAHRNSB6RVSUWDDYS6HV6FCUB4ESNISK575GS4WMBVAJ` | [1a9cc...d32f](https://stellar.expert/explorer/testnet/) |
+| **Marketplace** | `CCXCZKXBRSWRTKMB3I2LBWM2BLRVWQ325PCYKKSEQQNY572C55CN3KVQ` | [View on Explorer](https://stellar.expert/explorer/testnet/) |
+| **Text Processor** | `CD3H3JTC2L44K4IQNB7UG54D6O3LJMUQ6B52XOHE4F7CLSMTC7NQQ637` | [0ef6fc14...3065e](https://stellar.expert/explorer/testnet/tx/0ef6fc14a25d6bf621a852a9db2b51a2d6f8257de70a779a5296949c7083065e) |
+| **Hash Generator** | `CAN3VNEU4CMQMWRIEFCIIMBKPTALRXIT6NIZI7R6DE7U6YKQ77JVB7FA` | [d03a632d...e73ef](https://stellar.expert/explorer/testnet/tx/d03a632d96ba21c05937c694c065d7c3bae95da68f0650217d0df17b8ace73ef) |
+| **ASCII Art Gen** | `CBLZWGPNJIRUCKUOZ4OJNNYGYG2JTLDXALFWFBTBLGSZPPEAPETBEVKD` | [076c6481...9257a](https://stellar.expert/explorer/testnet/tx/076c64816b012e221d354f7199f3390f427c202a83772acc9bcd97bf1b99257a) |
+
 
 >**Note:** Intracontract calls are utilized in this project. The **Marketplace** contract internally invokes the **XLM Token** contract `transfer` function to handle payments natively.
 

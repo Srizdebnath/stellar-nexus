@@ -8,7 +8,7 @@ interface FeeSponsorshipProps {
     sponsorAddress?: string;
 }
 
-export default function FeeSponsorship({ enabled, onToggle, sponsorAddress = "GBNEXUS...SPONSOR" }: FeeSponsorshipProps) {
+export default function FeeSponsorship({ enabled, onToggle, sponsorAddress = "GBQUOYUK5SBEOUNSC4JWHNFTBAIHNU2RBDC7OYPRE2LCMH4BD3YHI4ZC" }: FeeSponsorshipProps) {
     return (
         <div className={`p-4 rounded-2xl border transition-all duration-300 ${enabled ? 'bg-cyan-500/10 border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.1)]' : 'bg-white/5 border-white/10'}`}>
             <div className="flex items-center justify-between mb-3">

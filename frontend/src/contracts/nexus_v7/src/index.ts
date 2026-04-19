@@ -31,7 +31,12 @@ if (typeof window !== "undefined") {
 }
 
 
-
+export const networks = {
+  testnet: {
+    networkPassphrase: "Test SDF Network ; September 2015",
+    contractId: "CCXCZKXBRSWRTKMB3I2LBWM2BLRVWQ325PCYKKSEQQNY572C55CN3KVQ",
+  }
+} as const
 
 
 export interface Review {
@@ -111,6 +116,11 @@ export interface Client {
   generate_hash: ({text}: {text: string}, options?: MethodOptions) => Promise<AssembledTransaction<Buffer>>
 
   /**
+   * Construct and simulate a has_purchased transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  has_purchased: ({user, listing_id}: {user: string, listing_id: u64}, options?: MethodOptions) => Promise<AssembledTransaction<boolean>>
+
+  /**
    * Construct and simulate a update_applet transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    * Update an existing applet (Owner Only)
    */
@@ -157,6 +167,7 @@ export class Client extends ContractClient {
         "AAAAAAAAAAAAAAAMZ2VuZXJhdGVfYXJ0AAAAAQAAAAAAAAAEdGV4dAAAABAAAAABAAAD6gAAABA=",
         "AAAAAAAAAAAAAAAMbGVhdmVfcmV2aWV3AAAABAAAAAAAAAAEdXNlcgAAABMAAAAAAAAACmxpc3RpbmdfaWQAAAAAAAYAAAAAAAAABnJhdGluZwAAAAAABAAAAAAAAAAHY29tbWVudAAAAAAQAAAAAA==",
         "AAAAAAAAAAAAAAANZ2VuZXJhdGVfaGFzaAAAAAAAAAEAAAAAAAAABHRleHQAAAAQAAAAAQAAA+4AAAAg",
+        "AAAAAAAAAAAAAAANaGFzX3B1cmNoYXNlZAAAAAAAAAIAAAAAAAAABHVzZXIAAAATAAAAAAAAAApsaXN0aW5nX2lkAAAAAAAGAAAAAQAAAAE=",
         "AAAAAAAAACZVcGRhdGUgYW4gZXhpc3RpbmcgYXBwbGV0IChPd25lciBPbmx5KQAAAAAADXVwZGF0ZV9hcHBsZXQAAAAAAAADAAAAAAAAAAVvd25lcgAAAAAAABMAAAAAAAAAAmlkAAAAAAAGAAAAAAAAAARjb2RlAAAAEAAAAAA=",
         "AAAAAAAAAAAAAAANd2l0aGRyYXdfZmVlcwAAAAAAAAIAAAAAAAAADXRva2VuX2FkZHJlc3MAAAAAAAATAAAAAAAAAAZhbW91bnQAAAAAAAsAAAAA",
         "AAAAAAAAAAAAAAARZ2V0X2xpc3RpbmdfY291bnQAAAAAAAAAAAAAAQAAAAY=" ]),
@@ -174,6 +185,7 @@ export class Client extends ContractClient {
         generate_art: this.txFromJSON<Array<string>>,
         leave_review: this.txFromJSON<null>,
         generate_hash: this.txFromJSON<Buffer>,
+        has_purchased: this.txFromJSON<boolean>,
         update_applet: this.txFromJSON<null>,
         withdraw_fees: this.txFromJSON<null>,
         get_listing_count: this.txFromJSON<u64>

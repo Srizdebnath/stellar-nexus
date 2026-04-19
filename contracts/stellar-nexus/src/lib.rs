@@ -266,6 +266,14 @@ impl NexusContract {
         env.storage().instance().get(&DataKey::Admin).unwrap()
     }
 
+    pub fn has_purchased(env: Env, user: Address, listing_id: u64) -> bool {
+        env.storage()
+            .persistent()
+            .get(&DataKey::Purchase(user, listing_id))
+            .unwrap_or(false)
+    }
+
+
     // --- LEGACY APPLET EXAMPLES (Enhanced) ---
 
     pub fn get_stats(_env: Env, text: String) -> u32 {

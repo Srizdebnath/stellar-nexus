@@ -2,13 +2,13 @@
 import React, { useState } from 'react';
 import { isAllowed, setAllowed, requestAccess } from '@stellar/freighter-api';
 import { Networks } from '@stellar/stellar-sdk';
-import { Client } from "../../contracts/nexus_v2/src";
+import { Client } from "../../contracts/nexus_v7/src";
 import Link from 'next/link';
 import { ArrowDown, CheckCircle, Play, Layers, Activity, ArrowRight } from 'lucide-react';
 import PipelineScene from '../../components/PipelineScene';
 
 // 🛑 PASTE YOUR CONTRACT ID HERE
-const CONTRACT_ID = "CC7TCSL5RH6UOIHAPPJLBRTPQDVUDLQCW4HCFNKAOHLVP7Q6A443PYXW";
+const CONTRACT_ID = "CCXCZKXBRSWRTKMB3I2LBWM2BLRVWQ325PCYKKSEQQNY572C55CN3KVQ";
 
 export default function PipelinePage() {
     const [walletAddress, setWalletAddress] = useState<string | null>(null);

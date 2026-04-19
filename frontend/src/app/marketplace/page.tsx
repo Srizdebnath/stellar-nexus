@@ -8,75 +8,19 @@ import MarketplaceScene from '../../components/MarketplaceScene';
 import FeeSponsorship from '../../components/FeeSponsorship';
 
 
-import { Client } from "../../contracts/nexus_v6/src";
-import { rpc } from "../../contracts/nexus_v6/src";
+import { Client } from "../../contracts/nexus_v7/src";
+import { rpc } from "../../contracts/nexus_v7/src";
+
 import Link from 'next/link';
 
 
-const CONTRACT_ID = "CAAQBQS5XV4KB3TKY4CLLEXGQL2Y43D5HG2JPVKKBQ7CWYK2YXT7M5LE";
+const CONTRACT_ID = "CCXCZKXBRSWRTKMB3I2LBWM2BLRVWQ325PCYKKSEQQNY572C55CN3KVQ";
 
 
 const CREATOR_WALLET = "GBKPWDVU4MJQ4JPMMYWOFTKAGQCSGOWC4MRHMS4VXUJSJJ6HYZBG2OPH";
 
 
-const APPLETS = [
-  {
-    id: 1,
-    name: "Text Processor",
-    contractId: CONTRACT_ID,
-    owner: CREATOR_WALLET,
-    description: "[Functions: get_stats, execute] Process and analyze text data on-chain. Returns verified stats.",
-    price: "10",
-    status: "Active",
-    color: "blue",
-    category: "Utility",
-    rating_sum: 45,
-    rating_count: 5,
-    version: 1,
-  },
-  {
-    id: 2,
-    name: "Hash Generator",
-    contractId: CONTRACT_ID,
-    owner: CREATOR_WALLET,
-    description: "[Functions: generate_hash] Cryptographic SHA-256 hash generation for any input data.",
-    price: "25",
-    status: "Active",
-    color: "purple",
-    category: "Security",
-    rating_sum: 20,
-    rating_count: 2,
-    version: 1,
-  },
-  {
-    id: 3,
-    name: "ASCII Art Gen",
-    contractId: CONTRACT_ID,
-    owner: CREATOR_WALLET,
-    description: "[Functions: generate_art] Generates retro ASCII art frames for your text on-chain.",
-    price: "5",
-    status: "Active",
-    color: "green",
-    category: "Art",
-    rating_sum: 50,
-    rating_count: 5,
-    version: 1,
-  },
-  {
-    id: 4,
-    name: "AI Code Assistant",
-    contractId: "N/A (Off-Chain)",
-    owner: CREATOR_WALLET,
-    description: "[Model: Llama 3.2] Custom-trained LLM to generate Soroban Rust code snippets.",
-    price: "50",
-    status: "Experimental",
-    color: "yellow",
-    category: "AI",
-    rating_sum: 120,
-    rating_count: 12,
-    version: 1,
-  }
-];
+const APPLETS: any[] = [];
 
 
 // --- HELPER: CONVERT BYTES TO HEX ---
@@ -87,13 +31,66 @@ const toHex = (buffer: Uint8Array | number[]) => {
 };
 
 // --- COMPONENT: APPLET DETAILS MODAL ---
-function AppletModal({ applet, onClose, walletAddress }: { applet: any, onClose: () => void, walletAddress: string | null }) {
+function AppletModal({ applet, onClose, walletAddress, isGasless, executeWithSponsorship }: { 
+  applet: any, 
+  onClose: () => void, 
+  walletAddress: string | null,
+  isGasless: boolean,
+  executeWithSponsorship: (assembled: any) => Promise<any>
+}) {
   const [isPurchased, setIsPurchased] = useState(false);
   const [buying, setBuying] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
+  const [userRating, setUserRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [hasReviewed, setHasReviewed] = useState(false);
+
+
+  React.useEffect(() => {
+    if (walletAddress && applet.id) {
+      checkPurchaseStatus();
+    }
+  }, [walletAddress, applet.id]);
+
+  const checkPurchaseStatus = async () => {
+    try {
+      const server = new StellarSdk.rpc.Server("https://soroban-testnet.stellar.org");
+      const dummyKey = StellarSdk.Keypair.random();
+      const source = new StellarSdk.Account(dummyKey.publicKey(), "0");
+      
+      const tx = new StellarSdk.TransactionBuilder(source, { fee: StellarSdk.BASE_FEE, networkPassphrase: StellarSdk.Networks.TESTNET })
+        .addOperation(StellarSdk.Operation.invokeHostFunction({
+          func: StellarSdk.xdr.HostFunction.hostFunctionTypeInvokeContract(
+            new StellarSdk.xdr.InvokeContractArgs({
+              contractAddress: new StellarSdk.Address(CONTRACT_ID).toScAddress(),
+              functionName: "has_purchased",
+              args: [
+                new StellarSdk.Address(walletAddress!).toScVal(),
+                StellarSdk.nativeToScVal(applet.id, { type: 'u64' })
+              ]
+            })
+          ), auth: []
+        })).setTimeout(30).build();
+
+      const sim = await server.simulateTransaction(tx);
+      if (StellarSdk.rpc.Api.isSimulationSuccess(sim)) {
+        // @ts-ignore
+        const res = sim.result.retval;
+        const bought = StellarSdk.scValToNative(res);
+        if (bought) setIsPurchased(true);
+      }
+    } catch (e) {
+      console.warn("Status check failed", e);
+    }
+  };
+
+
+
 
   // Parse price safely
   const listingPrice = applet.price ? applet.price.toString() : "0";
-  const rating = applet.rating_count > 0 ? (applet.rating_sum / applet.rating_count).toFixed(1) : "0.0";
+  const ratingDisplay = applet.rating_count > 0 ? (applet.rating_sum / applet.rating_count).toFixed(1) : "0.0";
+
 
   const handleDownload = () => {
     // In a real app, this would fetch the WASM or Source based on the code_uri
@@ -120,19 +117,23 @@ function AppletModal({ applet, onClose, walletAddress }: { applet: any, onClose:
         networkPassphrase: StellarSdk.Networks.TESTNET,
         contractId: CONTRACT_ID,
         rpcUrl: "https://soroban-testnet.stellar.org",
+        publicKey: walletAddress,
       });
 
       console.log(`Processing on-chain purchase for applet #${applet.id}...`);
 
-      const tx = await client.buy_applet({
+      const assembled = await client.buy_applet({
         buyer: walletAddress,
         listing_id: BigInt(applet.id),
-        token_address: "CAS3J7GYLGXGR6YMG23L6IUAJ65WHD6HLD7EEM6IDU576QTVF6AWLCH7"
+        token_address: "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
       });
 
-      const res = await tx.signAndSend();
+      if (isGasless) {
+        await executeWithSponsorship(assembled);
+      } else {
+        await assembled.signAndSend();
+      }
 
-      console.log("Transaction Result:", res);
       setIsPurchased(true);
       alert(`Success! Applet #${applet.id} purchased on-chain with fee deduction.`);
 
@@ -142,6 +143,41 @@ function AppletModal({ applet, onClose, walletAddress }: { applet: any, onClose:
     }
     setBuying(false);
   };
+
+  const handleLeaveReview = async () => {
+    if (!walletAddress) return;
+    setReviewing(true);
+    try {
+      const client = new Client({
+        networkPassphrase: StellarSdk.Networks.TESTNET,
+        contractId: CONTRACT_ID,
+        rpcUrl: "https://soroban-testnet.stellar.org",
+        publicKey: walletAddress,
+      });
+
+      const assembled = await client.leave_review({
+        user: walletAddress,
+        listing_id: BigInt(applet.id),
+        rating: userRating,
+        comment: comment || "Excellent logic!"
+
+      });
+
+      if (isGasless) {
+        await executeWithSponsorship(assembled);
+      } else {
+        await assembled.signAndSend();
+      }
+
+      setHasReviewed(true);
+      alert("Review submitted successfully!");
+    } catch (e: any) {
+      console.error("Review Error:", e);
+      alert("Failed to submit review: " + e.message);
+    }
+    setReviewing(false);
+  };
+
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-xl p-4">
@@ -155,7 +191,8 @@ function AppletModal({ applet, onClose, walletAddress }: { applet: any, onClose:
             <div className="flex items-center gap-4 text-xs font-mono text-zinc-500">
               <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> {applet.category || "General"}</span>
               <span className="flex items-center gap-1"><History className="w-3 h-3" /> v{applet.version || 1}</span>
-              <span className="flex items-center gap-1 text-yellow-500/80"><Star className="w-3 h-3 fill-current" /> {rating} ({applet.rating_count || 0} reviews)</span>
+              <span className="flex items-center gap-1 text-yellow-500/80"><Star className="w-3 h-3 fill-current" /> {ratingDisplay} ({applet.rating_count || 0} reviews)</span>
+
             </div>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-white transition p-2 bg-white/5 rounded-lg"><X className="w-6 h-6" /></button>
@@ -168,15 +205,43 @@ function AppletModal({ applet, onClose, walletAddress }: { applet: any, onClose:
             </p>
           </div>
 
-          <div className="bg-white/5 px-4 py-3 rounded-xl border border-white/5 mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-zinc-500" />
-              <span className="text-sm text-zinc-400">Add a review after purchase</span>
+          {(isPurchased || hasReviewed) ? (
+            <div className="bg-blue-500/5 p-6 rounded-2xl border border-blue-500/20 mb-6">
+                <p className="text-xs text-blue-400 font-bold uppercase mb-4">Leave a Review</p>
+                <div className="flex gap-2 mb-4">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <button key={i} onClick={() => setUserRating(i)}>
+                      <Star className={`w-6 h-6 ${i <= userRating ? 'text-yellow-500 fill-current' : 'text-zinc-700'}`} />
+                    </button>
+                  ))}
+                </div>
+
+                <textarea 
+                  placeholder="Share your experience with this logic..."
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-blue-500 outline-none transition mb-4 resize-none h-20"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+                <button 
+                  onClick={handleLeaveReview}
+                  disabled={reviewing || hasReviewed}
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-xl font-bold transition disabled:opacity-50"
+                >
+                  {reviewing ? "Submitting..." : hasReviewed ? "Reviewed" : "Submit Review"}
+                </button>
             </div>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-4 h-4 text-zinc-700" />)}
+          ) : (
+            <div className="bg-white/5 px-4 py-3 rounded-xl border border-white/5 mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-zinc-500" />
+                <span className="text-sm text-zinc-400">Add a review after purchase</span>
+              </div>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-4 h-4 text-zinc-700" />)}
+              </div>
             </div>
-          </div>
+          )}
+
 
           <div className="flex items-center justify-between pt-4 border-t border-white/5">
             <div><p className="text-xs text-gray-500 mb-1 font-medium uppercase tracking-wider">Price</p><p className="text-3xl font-bold text-white tracking-tight">{listingPrice} <span className="text-sm font-normal text-zinc-500">XLM</span></p></div>
@@ -290,7 +355,21 @@ export default function Home() {
           const itemSim = await server.simulateTransaction(itemTx);
           if (StellarSdk.rpc.Api.isSimulationSuccess(itemSim)) {
             // @ts-ignore
-            items.push(StellarSdk.scValToNative(itemSim.result.retval));
+            const rawItem = StellarSdk.scValToNative(itemSim.result.retval);
+            
+            if (rawItem.name === "Text Processor") {
+                rawItem.description = "[Functions: get_stats, execute] Process and analyze text data on-chain. Returns verified stats.";
+                rawItem.color = "blue";
+            } else if (rawItem.name === "Hash Generator") {
+                rawItem.description = "[Functions: generate_hash] Cryptographic SHA-256 hash generation for any input data.";
+                rawItem.color = "purple";
+            } else if (rawItem.name === "ASCII Art Gen") {
+                rawItem.description = "[Functions: generate_art] Generates retro ASCII art frames for your text on-chain.";
+                rawItem.color = "green";
+            }
+            
+            rawItem.contractId = rawItem.code_uri;
+            items.push(rawItem);
           }
         } catch (ignored) { }
       }
@@ -311,54 +390,41 @@ export default function Home() {
 
       // 2. User signs the inner transaction via Freighter
       console.log("Requesting user signature for gasless transaction...");
-      const signedInnerXdr = await signTransaction(tx.toXDR(), {
+      const signedResult = await signTransaction(tx.toXDR(), {
         networkPassphrase: Networks.TESTNET,
       });
 
-      // 3. Send to our Sponsorship API to wrap in a Fee Bump
-      console.log("Requesting fee sponsorship...");
+      // Freighter v6+ returns { signedTxXdr, signerAddress } instead of a plain string
+      const signedInnerXdr = typeof signedResult === 'string' ? signedResult : signedResult.signedTxXdr;
+      console.log("Freighter signed XDR type:", typeof signedInnerXdr, "length:", signedInnerXdr?.length);
+
+      // 3. Send to server — it will fee-bump, sign, submit, and poll
+      console.log("Sending to sponsorship API for fee bump + submission...");
       const sponsorRes = await fetch('/api/sponsor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transactionXdr: signedInnerXdr }),
       });
 
+      const sponsorData = await sponsorRes.json();
       if (!sponsorRes.ok) {
-        const errorData = await sponsorRes.json();
-        throw new Error(errorData.error || "Sponsorship failed");
+        throw new Error(sponsorData.error || "Sponsorship failed");
       }
 
-      const { signedXdr } = await sponsorRes.json();
+      console.log("Sponsored transaction result:", sponsorData);
 
-      // 4. Submit the Fee Bump transaction
-      console.log("Submitting sponsored transaction to network...");
-      const server = new rpc.Server("https://soroban-testnet.stellar.org");
-      const submission = await server.sendTransaction(new StellarSdk.Transaction(signedXdr, Networks.TESTNET));
-
-      if (submission.status !== "PENDING") {
-        throw new Error("Submission failed: " + (submission as any).errorResultXdr || submission.status);
-      }
-
-      // 5. Wait for transaction to be included in a ledger
-      let status = "PENDING";
-      let txResult = null;
-      while (status === "PENDING") {
-        await new Promise(r => setTimeout(r, 2000));
-        txResult = await server.getTransaction(submission.hash);
-        status = txResult.status;
-      }
-
-      if (status === "SUCCESS") {
-        console.log("Gasless Transaction Successful!", txResult);
-        return txResult;
+      if (sponsorData.status === "SUCCESS") {
+        console.log("Gasless Transaction Successful! Hash:", sponsorData.hash);
+        return sponsorData;
       } else {
-        throw new Error("Transaction failed on-chain");
+        throw new Error(`Transaction ended with status: ${sponsorData.status}`);
       }
     } catch (e: any) {
       console.error("Sponsorship Error:", e);
       throw e;
     }
   };
+
 
   // Demo Logic
   const runStatsApplet = async () => {
@@ -367,7 +433,7 @@ export default function Home() {
     try {
       const client = new Client({
         networkPassphrase: Networks.TESTNET,
-        contractId: CONTRACT_ID,
+        contractId: "CD3H3JTC2L44K4IQNB7UG54D6O3LJMUQ6B52XOHE4F7CLSMTC7NQQ637",
         rpcUrl: "https://soroban-testnet.stellar.org",
         publicKey: walletAddress || undefined,
       });
@@ -376,11 +442,12 @@ export default function Home() {
 
       if (isGasless) {
         await executeWithSponsorship(assembled);
+        const sim = await assembled.simulate();
+        setResult(`Success! Length: ${sim.result}`);
       } else {
-        await assembled.signAndSend();
+        const tx = await assembled.signAndSend();
+        setResult(`Success! Length: ${tx.result}`);
       }
-
-      setResult(`Success! Stats updated.`);
     } catch (e: any) {
       console.error(e);
       alert("Execution failed: " + e.message);
@@ -394,7 +461,7 @@ export default function Home() {
     try {
       const client = new Client({
         networkPassphrase: Networks.TESTNET,
-        contractId: CONTRACT_ID,
+        contractId: "CBZ5OCL3ZNC7UZ43M4QX5WENPEGHZSG6D3MG75G3DBZUQSQTWP3EBCNE",
         rpcUrl: "https://soroban-testnet.stellar.org",
         publicKey: walletAddress || undefined,
       });
@@ -402,9 +469,11 @@ export default function Home() {
       const assembled = await client.generate_hash({ text: hashInput });
 
       if (isGasless) {
-        const res = await executeWithSponsorship(assembled);
-        // Extract result from simulation if needed, but here we just show success
-        setHashResult("Transaction sponsored successfully!");
+        await executeWithSponsorship(assembled);
+        const sim = await assembled.simulate();
+        if (sim.result) {
+          setHashResult("0x" + toHex(sim.result as any));
+        }
       } else {
         const tx = await assembled.signAndSend();
         if (tx && (tx as any).result) {
@@ -424,20 +493,23 @@ export default function Home() {
     try {
       const client = new Client({
         networkPassphrase: Networks.TESTNET,
-        contractId: CONTRACT_ID,
+        contractId: "CBLZWGPNJIRUCKUOZ4OJNNYGYG2JTLDXALFWFBTBLGSZPPEAPETBEVKD",
         rpcUrl: "https://soroban-testnet.stellar.org",
         publicKey: walletAddress || undefined,
       });
 
-      const assembled = await client.generate_art({ text: `|  ${artInput}  |` });
+      const assembled = await client.generate_art({ text: artInput });
 
       if (isGasless) {
         await executeWithSponsorship(assembled);
-        setArtResult(["Sponsored Execution Successful", "Check Explorer for Art Data"]);
+        const sim = await assembled.simulate();
+        if (sim.result) {
+          setArtResult(String(sim.result).split('\n'));
+        }
       } else {
         const tx = await assembled.signAndSend();
         if (tx && (tx as any).result) {
-          setArtResult((tx as any).result);
+          setArtResult(String((tx as any).result).split('\n'));
         }
       }
     } catch (e: any) {
@@ -670,8 +742,15 @@ export default function Home() {
       </div>
 
       {selectedApplet && (
-        <AppletModal applet={selectedApplet} onClose={() => setSelectedApplet(null)} walletAddress={walletAddress} />
+        <AppletModal 
+          applet={selectedApplet} 
+          onClose={() => setSelectedApplet(null)} 
+          walletAddress={walletAddress} 
+          isGasless={isGasless}
+          executeWithSponsorship={executeWithSponsorship}
+        />
       )}
+
     </main>
   );
 }

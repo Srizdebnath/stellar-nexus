@@ -6,7 +6,7 @@ import MarketplaceScene from '../../components/MarketplaceScene';
 import { isAllowed, setAllowed, requestAccess } from '@stellar/freighter-api';
 import * as StellarSdk from '@stellar/stellar-sdk';
 
-const CONTRACT_ID = "CAAQBQS5XV4KB3TKY4CLLEXGQL2Y43D5HG2JPVKKBQ7CWYK2YXT7M5LE"; // Updated ID
+const CONTRACT_ID = "CCXCZKXBRSWRTKMB3I2LBWM2BLRVWQ325PCYKKSEQQNY572C55CN3KVQ"; // Updated ID
 const NETWORK_PASSPHRASE = StellarSdk.Networks.TESTNET;
 const SOROBAN_RPC_URL = "https://soroban-testnet.stellar.org";
 
