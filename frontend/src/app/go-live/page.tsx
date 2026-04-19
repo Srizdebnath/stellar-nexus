@@ -239,14 +239,16 @@ export default function GoLivePage() {
             <nav className="border-b border-white/5 px-8 py-4 flex justify-between items-center backdrop-blur-md sticky top-0 z-50 bg-black/40">
                 <div className="flex items-center gap-2">
                     <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition group">
-                        <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 group-hover:text-white transition">Stellar Nexus</span>
+                        <img src="/logo.jpg" alt="Stellar Nexus Logo" className="h-10 w-auto object-contain hover:scale-105 transition duration-300" />
                     </Link>
                 </div>
                 <div className="flex gap-6 text-sm text-gray-400">
-                    <Link href="/marketplace" className="hover:text-white transition">Marketplace</Link>
-                    <Link href="/pipeline" className="hover:text-white transition">Pipeline</Link>
-                    <Link href="/dashboard" className="hover:text-white transition">Dashboard</Link>
-                    <Link href="/docs" className="hover:text-white transition">Docs</Link>
+                    <Link href="/" className="hover:text-white transition hover:scale-105 duration-200">Home</Link>
+                    <Link href="/marketplace" className="hover:text-white transition hover:scale-105 duration-200">Marketplace</Link>
+                    <Link href="/pipeline" className="hover:text-white transition hover:scale-105 duration-200">Pipeline</Link>
+                    <Link href="/dashboard" className="hover:text-white transition hover:scale-105 duration-200">Dashboard</Link>
+                    <Link href="/stats" className="hover:text-white transition hover:scale-105 duration-200">Stats</Link>
+                    <Link href="/docs" className="hover:text-white transition hover:scale-105 duration-200">Docs</Link>
                     <span className="text-cyan-400 font-medium">Go Live</span>
                 </div>
                 <button

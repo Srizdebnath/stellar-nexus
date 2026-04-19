@@ -27,12 +27,16 @@ export default function LandingPage() {
       {/* Navbar */}
       <nav className="relative z-50 border-b border-white/5 px-8 py-4 flex justify-between items-center backdrop-blur-sm bg-black/50">
         <div className="flex items-center gap-2">
-          <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Stellar Nexus</span>
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition group">
+            <img src="/logo.jpg" alt="Stellar Nexus Logo" className="h-10 w-auto object-contain hover:scale-105 transition duration-300" />
+          </Link>
         </div>
         <div className="hidden md:flex gap-8 text-sm text-gray-400 font-medium">
+          <Link href="/" className="hover:text-white transition hover:scale-105 duration-200">Home</Link>
           <Link href="/marketplace" className="hover:text-white transition hover:scale-105 duration-200">Marketplace</Link>
           <Link href="/pipeline" className="hover:text-white transition hover:scale-105 duration-200">Pipeline</Link>
           <Link href="/dashboard" className="hover:text-white transition hover:scale-105 duration-200">Dashboard</Link>
+          <Link href="/stats" className="hover:text-white transition hover:scale-105 duration-200">Stats</Link>
           <Link href="/docs" className="hover:text-white transition hover:scale-105 duration-200">Docs</Link>
           <Link href="/go-live" className="text-cyan-400 font-medium hover:text-cyan-300 transition hover:scale-105 duration-200">Go Live</Link>
         </div>

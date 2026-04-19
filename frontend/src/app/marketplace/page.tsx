@@ -9,6 +9,7 @@ import FeeSponsorship from '../../components/FeeSponsorship';
 
 
 import { Client } from "../../contracts/nexus_v6/src";
+import { rpc } from "../../contracts/nexus_v6/src";
 import Link from 'next/link';
 
 
@@ -122,11 +123,11 @@ function AppletModal({ applet, onClose, walletAddress }: { applet: any, onClose:
       });
 
       console.log(`Processing on-chain purchase for applet #${applet.id}...`);
-      
+
       const tx = await client.buy_applet({
         buyer: walletAddress,
         listing_id: BigInt(applet.id),
-        token_address: "CAS3J7GYLGXGR6YMG23L6IUAJ65WHD6HLD7EEM6IDU576QTVF6AWLCH7" 
+        token_address: "CAS3J7GYLGXGR6YMG23L6IUAJ65WHD6HLD7EEM6IDU576QTVF6AWLCH7"
       });
 
       const res = await tx.signAndSend();
@@ -152,9 +153,9 @@ function AppletModal({ applet, onClose, walletAddress }: { applet: any, onClose:
               <span className="px-2 py-0.5 text-[10px] rounded border border-blue-500/30 bg-blue-500/10 text-blue-400 uppercase tracking-widest font-bold">Active</span>
             </div>
             <div className="flex items-center gap-4 text-xs font-mono text-zinc-500">
-              <span className="flex items-center gap-1"><Tag className="w-3 h-3"/> {applet.category || "General"}</span>
-              <span className="flex items-center gap-1"><History className="w-3 h-3"/> v{applet.version || 1}</span>
-              <span className="flex items-center gap-1 text-yellow-500/80"><Star className="w-3 h-3 fill-current"/> {rating} ({applet.rating_count || 0} reviews)</span>
+              <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> {applet.category || "General"}</span>
+              <span className="flex items-center gap-1"><History className="w-3 h-3" /> v{applet.version || 1}</span>
+              <span className="flex items-center gap-1 text-yellow-500/80"><Star className="w-3 h-3 fill-current" /> {rating} ({applet.rating_count || 0} reviews)</span>
             </div>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-white transition p-2 bg-white/5 rounded-lg"><X className="w-6 h-6" /></button>
@@ -163,17 +164,17 @@ function AppletModal({ applet, onClose, walletAddress }: { applet: any, onClose:
           <div className="mb-6">
             <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2 font-bold">Encrypted Logic Hash / Preview</p>
             <p className="text-zinc-300 text-sm p-4 bg-black/40 rounded-xl border border-white/5 backdrop-blur-sm leading-relaxed font-mono overflow-auto max-h-40 border-l-2 border-l-blue-500">
-                {applet.code_uri || "No source code available for preview."}
+              {applet.code_uri || "No source code available for preview."}
             </p>
           </div>
-          
+
           <div className="bg-white/5 px-4 py-3 rounded-xl border border-white/5 mb-6 flex items-center justify-between">
             <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-zinc-500" />
-                <span className="text-sm text-zinc-400">Add a review after purchase</span>
+              <MessageSquare className="w-4 h-4 text-zinc-500" />
+              <span className="text-sm text-zinc-400">Add a review after purchase</span>
             </div>
             <div className="flex gap-1">
-                {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 text-zinc-700" />)}
+              {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-4 h-4 text-zinc-700" />)}
             </div>
           </div>
 
@@ -301,9 +302,122 @@ export default function Home() {
     setLoadingListings(false);
   };
 
+  // Advanced Feature: Fee Sponsorship Logic
+  const executeWithSponsorship = async (assembled: any) => {
+    try {
+      // 1. Get the built transaction
+      const tx = assembled.built;
+      if (!tx) throw new Error("Transaction not built. Ensure you are connected.");
+
+      // 2. User signs the inner transaction via Freighter
+      console.log("Requesting user signature for gasless transaction...");
+      const signedInnerXdr = await signTransaction(tx.toXDR(), {
+        networkPassphrase: Networks.TESTNET,
+      });
+
+      // 3. Send to our Sponsorship API to wrap in a Fee Bump
+      console.log("Requesting fee sponsorship...");
+      const sponsorRes = await fetch('/api/sponsor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactionXdr: signedInnerXdr }),
+      });
+
+      if (!sponsorRes.ok) {
+        const errorData = await sponsorRes.json();
+        throw new Error(errorData.error || "Sponsorship failed");
+      }
+
+      const { signedXdr } = await sponsorRes.json();
+
+      // 4. Submit the Fee Bump transaction
+      console.log("Submitting sponsored transaction to network...");
+      const server = new rpc.Server("https://soroban-testnet.stellar.org");
+      const submission = await server.sendTransaction(new StellarSdk.Transaction(signedXdr, Networks.TESTNET));
+
+      if (submission.status !== "PENDING") {
+        throw new Error("Submission failed: " + (submission as any).errorResultXdr || submission.status);
+      }
+
+      // 5. Wait for transaction to be included in a ledger
+      let status = "PENDING";
+      let txResult = null;
+      while (status === "PENDING") {
+        await new Promise(r => setTimeout(r, 2000));
+        txResult = await server.getTransaction(submission.hash);
+        status = txResult.status;
+      }
+
+      if (status === "SUCCESS") {
+        console.log("Gasless Transaction Successful!", txResult);
+        return txResult;
+      } else {
+        throw new Error("Transaction failed on-chain");
+      }
+    } catch (e: any) {
+      console.error("Sponsorship Error:", e);
+      throw e;
+    }
+  };
+
   // Demo Logic
-  const runStatsApplet = async () => { if (!inputText) return; setLoading(true); try { const client = new Client({ networkPassphrase: Networks.TESTNET, contractId: CONTRACT_ID, rpcUrl: "https://soroban-testnet.stellar.org", allowHttp: true, publicKey: walletAddress || undefined }); await client.get_stats({ text: inputText }, { fee: "10000" }); setResult(`Success!`); } catch (e) { alert("Execution failed."); } setLoading(false); };
-  const runHashApplet = async () => { if (!hashInput) return; setHashLoading(true); try { const client = new Client({ networkPassphrase: Networks.TESTNET, contractId: CONTRACT_ID, rpcUrl: "https://soroban-testnet.stellar.org", allowHttp: true, publicKey: walletAddress || undefined }); const tx = await client.generate_hash({ text: hashInput }, { fee: "10000" }); if (tx && tx.result) { setHashResult("0x" + toHex(tx.result)); } } catch (e) { alert("Hash failed."); } setHashLoading(false); };
+  const runStatsApplet = async () => {
+    if (!inputText) return;
+    setLoading(true);
+    try {
+      const client = new Client({
+        networkPassphrase: Networks.TESTNET,
+        contractId: CONTRACT_ID,
+        rpcUrl: "https://soroban-testnet.stellar.org",
+        publicKey: walletAddress || undefined,
+      });
+
+      const assembled = await client.get_stats({ text: inputText });
+
+      if (isGasless) {
+        await executeWithSponsorship(assembled);
+      } else {
+        await assembled.signAndSend();
+      }
+
+      setResult(`Success! Stats updated.`);
+    } catch (e: any) {
+      console.error(e);
+      alert("Execution failed: " + e.message);
+    }
+    setLoading(false);
+  };
+
+  const runHashApplet = async () => {
+    if (!hashInput) return;
+    setHashLoading(true);
+    try {
+      const client = new Client({
+        networkPassphrase: Networks.TESTNET,
+        contractId: CONTRACT_ID,
+        rpcUrl: "https://soroban-testnet.stellar.org",
+        publicKey: walletAddress || undefined,
+      });
+
+      const assembled = await client.generate_hash({ text: hashInput });
+
+      if (isGasless) {
+        const res = await executeWithSponsorship(assembled);
+        // Extract result from simulation if needed, but here we just show success
+        setHashResult("Transaction sponsored successfully!");
+      } else {
+        const tx = await assembled.signAndSend();
+        if (tx && (tx as any).result) {
+          setHashResult("0x" + toHex((tx as any).result));
+        }
+      }
+    } catch (e: any) {
+      console.error(e);
+      alert("Hash failed: " + e.message);
+    }
+    setHashLoading(false);
+  };
+
   const runArtApplet = async () => {
     if (!artInput) return;
     setArtLoading(true);
@@ -312,18 +426,23 @@ export default function Home() {
         networkPassphrase: Networks.TESTNET,
         contractId: CONTRACT_ID,
         rpcUrl: "https://soroban-testnet.stellar.org",
-        allowHttp: true,
         publicKey: walletAddress || undefined,
       });
 
-      // Call generate_art
-      const tx = await client.generate_art({ text: `|  ${artInput}  |` }, { fee: "10000", timeoutInSeconds: 30 });
-      if (tx && tx.result) {
-        setArtResult(tx.result); // result is an array of strings
+      const assembled = await client.generate_art({ text: `|  ${artInput}  |` });
+
+      if (isGasless) {
+        await executeWithSponsorship(assembled);
+        setArtResult(["Sponsored Execution Successful", "Check Explorer for Art Data"]);
+      } else {
+        const tx = await assembled.signAndSend();
+        if (tx && (tx as any).result) {
+          setArtResult((tx as any).result);
+        }
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("Art generation failed.");
+      alert("Art generation failed: " + e.message);
     }
     setArtLoading(false);
   };
@@ -333,7 +452,7 @@ export default function Home() {
     setAiLoading(true);
     setAiResult("");
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_AI_API_URL || 'http://localhost:7860'; // Fixed Port
+      const apiUrl = process.env.NEXT_PUBLIC_AI_API_URL || 'http://localhost:7860';
       const response = await fetch(`${apiUrl}/api/generate-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -360,14 +479,16 @@ export default function Home() {
       {/* Navbar */}
       <nav className="border-b border-white/5 px-8 py-4 flex justify-between items-center backdrop-blur-md sticky top-0 z-50 bg-black/20">
         <div className="flex items-center gap-2">
-          <Link href="/">
-            <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 cursor-pointer hover:opacity-80 transition">Stellar Nexus</span>
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition group">
+            <img src="/logo.jpg" alt="Stellar Nexus Logo" className="h-10 w-auto object-contain hover:scale-105 transition duration-300" />
           </Link>
         </div>
         <div className="hidden md:flex gap-8 text-sm text-gray-400 font-medium">
+          <Link href="/" className="hover:text-white transition hover:scale-105 duration-200">Home</Link>
           <span className="text-white font-medium">Marketplace</span>
           <Link href="/pipeline" className="hover:text-white transition hover:scale-105 duration-200">Pipeline</Link>
           <Link href="/dashboard" className="hover:text-white transition hover:scale-105 duration-200">Dashboard</Link>
+          <Link href="/stats" className="hover:text-white transition hover:scale-105 duration-200">Stats</Link>
           <Link href="/docs" className="hover:text-white transition hover:scale-105 duration-200">Docs</Link>
           <Link href="/go-live" className="text-cyan-400 font-medium hover:text-cyan-300 transition hover:scale-105 duration-200">Go Live</Link>
         </div>
