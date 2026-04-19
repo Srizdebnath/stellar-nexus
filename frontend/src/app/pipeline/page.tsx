@@ -45,7 +45,7 @@ export default function PipelinePage() {
             console.log("Running Step 1: Text Processor...");
             // In a real pipeline, we'd sign once. For this demo, we might sign twice 
             // or use the result of 1 to feed 2 locally.
-            const tx1 = await client.execute({ text: inputText }, { fee: "10000" });
+            const tx1 = await client.get_stats({ text: inputText }, { fee: "10000" });
 
             // Simulate extracting the "Processed" text (In real app we parse tx1.result)
             const intermediateData = inputText + " [Verified]";
